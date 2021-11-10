@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "./SatoshiOpstion.sol";
 
 contract MinterAccess is AccessControl, Ownable {
     bytes32 internal constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -38,80 +37,11 @@ contract MinterAccess is AccessControl, Ownable {
 }
 
 contract Cppc is ERC20("Cppc", "Cppc"), MinterAccess {
-    uint256 upBtc = 0;
-    uint256 downBtc = 0;
-    string depositFee = "0.3";
-    string withdrawFee = "0.3";
-    struct CppcData {
-        address _address;
-        uint256 nftTokenId;
-        string lever;
-        string cppcNum;
-        uint256 createTime;
-        uint256 openPrice;
-        string direction;
-        bool isEnable;
-    }
-    mapping(address => CppcData) cppcStore;
-    address payable[] cppcAddress;
-    uint256 maxNftTokenId = 1;
-
     function mint(address _to, uint256 _amount) external onlyMinter {
         super._mint(_to, _amount);
     }
 
     function burn(uint256 _amount) external {
         super._burn(_msgSender(), _amount);
-    }
-
-    function SetConfig(
-        uint256 _upBtc,
-        uint256 _downBtc,
-        string memory _depositFee,
-        string memory _withdrawFee
-    ) public onlyOwner {
-        upBtc = _upBtc;
-        downBtc = _downBtc;
-        depositFee = _depositFee;
-        withdrawFee = _withdrawFee;
-    }
-
-    modifier isCppcAddress() {
-        CppcData storage cppcData = cppcStore[msg.sender];
-        if (cppcData.isEnable) {
-            _;
-        }
-    }
-
-    function getCppcInfo() external view returns (CppcData memory) {
-        CppcData storage cppcData = cppcStore[msg.sender];
-        return cppcData;
-    }
-
-    function Deposit(
-        string memory lever,
-        string memory amount,
-        uint256 btcPrice,
-        string memory _type
-    ) public payable returns (uint256) {
-        CppcData storage cppcData = cppcStore[msg.sender];
-        cppcData._address = msg.sender;
-        cppcData.nftTokenId = 0;
-        cppcData.lever = lever;
-        cppcData.cppcNum = amount;
-        cppcData.createTime = block.timestamp;
-        cppcData.openPrice = btcPrice;
-        cppcData.direction = _type;
-        cppcData.isEnable = true;
-        uint256 nftTokenId = nftMint(maxNftTokenId, cppcData);
-        cppcData.nftTokenId = nftTokenId;
-        maxNftTokenId = maxNftTokenId + 1;
-        cppcAddress.push(payable(msg.sender));
-        //TODO getCPPCNum
-        return 0;
-    }
-
-    function Withdraw(uint256 btcPrice) public isCppcAddress {
-        CppcData memory cppcData = this.getCppcInfo();
     }
 }
