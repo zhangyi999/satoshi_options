@@ -15,9 +15,9 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 空单BTC价格
     uint256 downBtc = 0;
     // 开仓费率
-    string depositFee = "0.3";
+    uint256 depositFee = 3000; //x 10000
     // 平仓费率
-    string withdrawFee = "0.3";
+    uint256 withdrawFee = 3000;
 
     // 用户的 nft 列表
     // user => [ids]
@@ -54,8 +54,8 @@ contract SatoshiOpstion is ERC721, Ownable {
     function SetConfig(
         uint256 _upBtc,
         uint256 _downBtc,
-        string memory _depositFee,
-        string memory _withdrawFee
+        uint256 _depositFee,
+        uint256 _withdrawFee
     ) public onlyOwner {
         upBtc = _upBtc;
         downBtc = _downBtc;
@@ -134,6 +134,8 @@ contract SatoshiOpstion is ERC721, Ownable {
         NftData memory nftData = this.getCppcInfo(_pid);
         nftData.isEnable = false;
     }
+
+    // function
 
     // 记录 id
     function _beforeTokenTransfer(
