@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "./SatoshiOpstion.sol";
 
 contract MinterAccess is AccessControl, Ownable {
     bytes32 internal constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -43,7 +44,7 @@ contract Cppc is ERC20("Cppc", "Cppc"), MinterAccess {
     string withdrawFee = "0.3";
     struct CppcData {
         address _address;
-        address _nftAddress;
+        uint256 nftTokenId;
         string lever;
         string cppcNum;
         uint256 createTime;
@@ -53,6 +54,7 @@ contract Cppc is ERC20("Cppc", "Cppc"), MinterAccess {
     }
     mapping(address => CppcData) cppcStore;
     address payable[] cppcAddress;
+    uint256 maxNftTokenId = 1;
 
     function mint(address _to, uint256 _amount) external onlyMinter {
         super._mint(_to, _amount);
@@ -92,17 +94,18 @@ contract Cppc is ERC20("Cppc", "Cppc"), MinterAccess {
         uint256 btcPrice,
         string memory _type
     ) public payable returns (uint256) {
-        address nftAddress = msg.sender; //TODO NFT id
         CppcData storage cppcData = cppcStore[msg.sender];
         cppcData._address = msg.sender;
-        cppcData._nftAddress = nftAddress;
+        cppcData.nftTokenId = 0;
         cppcData.lever = lever;
         cppcData.cppcNum = amount;
         cppcData.createTime = block.timestamp;
         cppcData.openPrice = btcPrice;
         cppcData.direction = _type;
         cppcData.isEnable = true;
-
+        uint256 nftTokenId = nftMint(maxNftTokenId, cppcData);
+        cppcData.nftTokenId = nftTokenId;
+        maxNftTokenId = maxNftTokenId + 1;
         cppcAddress.push(payable(msg.sender));
         //TODO getCPPCNum
         return 0;
@@ -110,6 +113,5 @@ contract Cppc is ERC20("Cppc", "Cppc"), MinterAccess {
 
     function Withdraw(uint256 btcPrice) public isCppcAddress {
         CppcData memory cppcData = this.getCppcInfo();
-        
     }
 }

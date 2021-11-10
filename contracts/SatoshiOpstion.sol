@@ -21,6 +21,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         string direction;
         bool isEnable;
     }
+    mapping(address => NftData) nftStore;
 
     constructor(
         address _cppc,
@@ -60,7 +61,19 @@ contract SatoshiOpstion is ERC721, Ownable {
         _idBalance[to].push(tokenId);
     }
 
-    function create() public returns (uint256 tokenId) {
-        
+    function nftMint(uint256 tokenId, NftData memory _nftData)
+        public
+        returns (uint256)
+    {
+        super._mint(_nftData._address, tokenId);
+        NftData storage nftData = nftStore[_nftData._address];
+        nftData._address = _nftData._address;
+        nftData.lever = _nftData.lever;
+        nftData.cppcNum = _nftData.cppcNum;
+        nftData.createTime = _nftData.createTime;
+        nftData.openPrice = _nftData.openPrice;
+        nftData.direction = _nftData.direction;
+        nftData.isEnable = true;
+        return tokenId;
     }
 }
