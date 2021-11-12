@@ -944,6 +944,11 @@
   "resolved" "https://registry.npmjs.org/@yarnpkg/lockfile/-/lockfile-1.1.0.tgz"
   "version" "1.1.0"
 
+"abdk-libraries-solidity@^3.0.0":
+  "integrity" "sha512-oKBj/1wK6hIXxYjX7b2vCzJPHs9GDu49EBpNfUOw2FpA/nu1oV7V598MgAbB1+R1u7vuUhL6DYqolV+GMWaLvA=="
+  "resolved" "https://registry.npmjs.org/abdk-libraries-solidity/-/abdk-libraries-solidity-3.0.0.tgz"
+  "version" "3.0.0"
+
 "abort-controller@^3.0.0":
   "integrity" "sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg=="
   "resolved" "https://registry.npmjs.org/abort-controller/-/abort-controller-3.0.0.tgz"

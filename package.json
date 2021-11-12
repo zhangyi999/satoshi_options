@@ -17,6 +17,7 @@
     "hardhat": "^2.6.8"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.2"
+    "@openzeppelin/contracts": "^4.3.2",
+    "abdk-libraries-solidity": "^3.0.0"
   }
 }

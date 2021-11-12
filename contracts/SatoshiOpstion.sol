@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "abdk-libraries-solidity/ABDKMath64x64.sol";
 
 contract SatoshiOpstion is ERC721, Ownable {
     // 筹码
@@ -15,9 +16,23 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 空单BTC价格
     uint256 downBtc = 0;
     // 开仓费率
-    uint256 depositFee = 3000; //x 10000
+    uint256 depositFee = 3000; // 0.3 * 10000;
     // 平仓费率
-    uint256 withdrawFee = 3000;
+    uint256 withdrawFee = 3000; // 0.3 * 10000;
+
+    uint256 sigma = 10000; //1 * 10000; 大写Σ，小写σ
+    uint256 lambda = 509686; // 50.9686 * 10000;
+    uint256 eta1 = 215100; //21.51 * 10000; η1
+    uint256 eta2 = 241500; //24.15 * 10000; η2
+    uint256 _p = 5645; //0.5645 * 10000;
+    uint256 _q = 4355; //0.4355 * 10000;
+
+    struct L1Item {
+        uint256 L1;
+        uint256 delta; //10**10
+        uint256 L2; //10**10
+    }
+    mapping(uint256 => L1Item) private _l1Table;
 
     // 用户的 nft 列表
     // user => [ids]
@@ -61,6 +76,19 @@ contract SatoshiOpstion is ERC721, Ownable {
         downBtc = _downBtc;
         depositFee = _depositFee;
         withdrawFee = _withdrawFee;
+    }
+
+    /**
+    配置L表格
+    */
+    function SetLTable(L1Item[] calldata _l1Item) external onlyOwner {
+        uint256 length = _l1Item.length;
+        require(length > 0);
+        for (uint256 i = 0; i < length; i++) {
+            L1Item memory l1Item = _l1Item[i];
+            uint256 _l1 = l1Item.L1;
+            _l1Table[_l1] = l1Item;
+        }
     }
 
     function balanceOfOwner(address _owner)
@@ -118,6 +146,38 @@ contract SatoshiOpstion is ERC721, Ownable {
         nftData.direction = _nftData.direction;
         nftData.isEnable = true;
         return pid;
+    }
+
+    // 获取Omg值
+    function getOmg(uint256 l1, uint256 l2) private view returns (int128) {
+        int128 _eta1_128 = ABDKMath64x64.fromUInt(eta1);
+        int128 _l1_128 = ABDKMath64x64.fromUInt(l1);
+        int128 _l2_128 = ABDKMath64x64.fromUInt(l2);
+        int128 _a = ABDKMath64x64.sub(_eta1_128, _l1_128);
+        int128 _b = _eta1_128;
+        int128 _a1 = _l2_128;
+        int128 _b1 = ABDKMath64x64.sub(_l2_128, _l1_128);
+        int128 _omg = ABDKMath64x64.mul(
+            ABDKMath64x64.div(_a, _b),
+            ABDKMath64x64.div(_a1, _b1)
+        );
+        return _omg;
+    }
+
+    // 获取开仓算数量
+    function getPurchaseQuantity(
+        int128 bk,
+        uint256 l1,
+        uint256 l2,
+        uint256
+    ) private view returns (int128) {
+        int128 omg = getOmg(l1, l2);
+        int128 bkPowL1 = ABDKMath64x64.pow(bk, l1);
+        int128 bkPowL2 = ABDKMath64x64.pow(bk, l2);
+        int128 omg1 = ABDKMath64x64.mul(omg, bkPowL1);
+        int128 omg2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, omg), bkPowL2);
+        int128 pbc = ABDKMath64x64.add(omg1, omg2);
+        return pbc;
     }
 
     function _mintNft(address _to) internal returns (uint256) {
