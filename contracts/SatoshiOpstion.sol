@@ -22,7 +22,9 @@ contract SatoshiOpstion is ERC721, Ownable {
     int128 withdrawFee = 3000; // 0.3 * 10000;
 
     int128 sigma = 10000; //1 * 10000; 大写Σ，小写σ
+    // sigma = 2**64
     int128 lambda = 509686; // 50.9686 * 10000; λ
+    // lambda = 50.9686 * 2**64 
     int128 eta1 = 215100; //21.51 * 10000; η1
     int128 eta2 = 241500; //24.15 * 10000; η2
     int128 _p = 5645; //0.5645 * 10000;
@@ -218,40 +220,39 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     // 获取开仓算数量
+    struct Qu {
+        bool direction;
+        int128 bk;
+        int128 delta;
+        int128 _i;
+    }
     function getPurchaseQuantity(
-        bool direction,
-        int128 bk,
-        int128 delta,
-        int128 _i
-    ) private view returns (int128) {
-        DeltaItem memory deltaItem = getDeltaTable(delta);
-        int128 l1 = deltaItem.L1;
-        int128 l2 = deltaItem.L2;
-        int128 l3 = deltaItem.L3;
-        int128 l4 = deltaItem.L4;
+        Qu memory _qu
+    ) public view returns (int128) {
+        DeltaItem memory deltaItem = getDeltaTable(_qu.delta);
+        
+        uint256 l1_uint256 = ABDKMath64x64.mulu(deltaItem.L1, 1);
+        uint256 l2_uint256 = ABDKMath64x64.mulu(deltaItem.L2, 1);
+        uint256 l3_uint256 = ABDKMath64x64.mulu(deltaItem.L3, 1);
+        uint256 l4_uint256 = ABDKMath64x64.mulu(deltaItem.L4, 1);
 
-        uint256 l1_uint256 = ABDKMath64x64.mulu(l1, 1);
-        uint256 l2_uint256 = ABDKMath64x64.mulu(l2, 1);
-        uint256 l3_uint256 = ABDKMath64x64.mulu(l3, 1);
-        uint256 l4_uint256 = ABDKMath64x64.mulu(l4, 1);
-
-        int128 omg = getUpOmg(l1, l2);
-        if (!direction) {
-            omg = getDownOmg(l3, l4);
+        int128 omg = getUpOmg(deltaItem.L1, deltaItem.L2);
+        if (!_qu.direction) {
+            omg = getDownOmg(deltaItem.L3, deltaItem.L4);
         }
-        int128 bkPowL1 = ABDKMath64x64.pow(bk, l1_uint256);
-        int128 bkPowL2 = ABDKMath64x64.pow(bk, l2_uint256);
-        int128 bkPowL3 = ABDKMath64x64.pow(bk, l3_uint256);
-        int128 bkPowL4 = ABDKMath64x64.pow(bk, l4_uint256);
+        int128 bkPowL1 = ABDKMath64x64.pow(_qu.bk, l1_uint256);
+        int128 bkPowL2 = ABDKMath64x64.pow(_qu.bk, l2_uint256);
+        int128 bkPowL3 = ABDKMath64x64.pow(_qu.bk, l3_uint256);
+        int128 bkPowL4 = ABDKMath64x64.pow(_qu.bk, l4_uint256);
         int128 omg1 = ABDKMath64x64.mul(omg, bkPowL1);
         int128 omg2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, omg), bkPowL2);
-        if (!direction) {
+
+        if (!_qu.direction) {
             omg1 = ABDKMath64x64.div(omg, bkPowL3);
             omg2 = ABDKMath64x64.div(ABDKMath64x64.sub(1, omg), bkPowL4);
         }
-        int128 pbc = ABDKMath64x64.add(omg1, omg2);
 
-        int128 _Q = ABDKMath64x64.div(_i, pbc);
+        int128 _Q = ABDKMath64x64.div(_qu._i, ABDKMath64x64.add(omg1, omg2));
         return _Q;
     }
 
@@ -329,7 +330,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 l1Orl3,
         int128 l2Orl4,
         int128 omg
-    ) private pure returns (int128) {
+    ) public pure returns (int128) {
         int128 _tb = getTB(true, B, K);
         uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
         uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
@@ -376,7 +377,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 rl,
         int128 Q,
         int128 pbct
-    ) private view returns (int128) {
+    ) public view returns (int128) {
         int128 a1 = ABDKMath64x64.log_2(ABDKMath64x64.div(_pcpct, _V));
         int128 a2 = ABDKMath64x64.log_2(
             ABDKMath64x64.mul(rl, ABDKMath64x64.mul(Q, pbct))
