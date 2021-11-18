@@ -35,11 +35,11 @@ contract SatoshiOpstion is ERC721, Ownable {
     int128 _V; //10000000000*2**64 btc全球总交易量
 
     struct DeltaItem {
-        int128 delta; //10**10  2**64  int128
-        int128 L1; //10**10
-        int128 L2; //10**10
-        int128 L3; //10**10
-        int128 L4; //10**10
+        int128 delta; //2**64  int128
+        int128 L1; //2**64  int128
+        int128 L2; //2**64  int128
+        int128 L3; //2**64  int128
+        int128 L4; //2**64  int128
     }
     mapping(int128 => DeltaItem) private _deltaTable;
 
@@ -289,7 +289,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         bool direction,
         int128 B,
         int128 K
-    ) private pure returns (int128) {
+    ) public pure returns (int128) {
         uint256 B_uint256 = ABDKMath64x64.mulu(B, 1);
         uint256 K_uint256 = ABDKMath64x64.mulu(K, 1);
         if (direction) {
@@ -316,7 +316,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 l1Orl3,
         int128 l2Orl4,
         int128 omg
-    ) private pure returns (int128) {
+    ) public pure returns (int128) {
         uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
         uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
         int128 _tb = getTB(true, B, K);
@@ -454,7 +454,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 获取平仓价值
     function getLiquidationNum(
         getLiquidationNumInfo memory _getLiquidationNumInfo
-    ) private view returns (int128) {
+    ) public view returns (int128) {
         int128 _a = ABDKMath64x64.mul(
             ABDKMath64x64.sub(1, withdrawFee),
             ABDKMath64x64.mul(
