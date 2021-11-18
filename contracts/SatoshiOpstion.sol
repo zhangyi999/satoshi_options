@@ -13,26 +13,26 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 仓位id
     uint256 private _totalSupply;
     // 多单BTC价格
-    int128 upBtc = 0;
+    int128 upBtc = 0; //2**64
     // 空单BTC价格
-    int128 downBtc = 0;
+    int128 downBtc = 0; //2**64
     // 开仓费率
-    int128 depositFee = 3000; // 0.3 * 10000;
+    int128 depositFee; // 0.3 * 2**64;
     // 平仓费率
-    int128 withdrawFee = 3000; // 0.3 * 10000;
+    int128 withdrawFee; // 0.3 * 2**64;
 
-    int128 sigma = 10000; //1 * 10000; 大写Σ，小写σ
+    int128 sigma; //1 * 2**64; 大写Σ，小写σ
     // sigma = 2**64
-    int128 lambda = 509686; // 50.9686 * 10000; λ
+    int128 lambda; // 50.9686 * 2**64; λ
     // lambda = 50.9686 * 2**64
-    int128 eta1 = 215100; //21.51 * 10000; η1
-    int128 eta2 = 241500; //24.15 * 10000; η2
-    int128 _p = 5645; //0.5645 * 10000;
-    int128 _q = 4355; //0.4355 * 10000;
+    int128 eta1; //21.51 * 2**64; η1
+    int128 eta2; //24.15 * 2**64; η2
+    int128 _p; //0.5645 * 2**64;
+    int128 _q; //0.4355 * 2**64;
 
-    int128 alpha = 600000; //6 * 10000
-    int128 _pcpct = 100; //0.01*10000 pccp价格
-    int128 _V = 1000000000000000; //10000000000*10000 btc全球总交易量
+    int128 alpha; //6 * 2**64
+    int128 _pcpct; //0.01*2**64 pccp价格
+    int128 _V; //10000000000*2**64 btc全球总交易量
 
     struct DeltaItem {
         int128 delta; //10**10  2**64  int128
@@ -471,7 +471,7 @@ contract SatoshiOpstion is ERC721, Ownable {
 
         uint256 _b_3_uint256 = Math.min(
             ABDKMath64x64.mulu(_b_1, 1),
-            ABDKMath64x64.mulu(1, 1) //toDo 0.1数值转换
+            ABDKMath64x64.mulu(1 * 2**64, 1) //toDo 0.1数值转换
         );
         int128 _b_3_uint256_int128 = ABDKMath64x64.fromUInt(_b_3_uint256);
         int128 _b = ABDKMath64x64.add(1, _b_3_uint256_int128);
