@@ -306,34 +306,37 @@ contract SatoshiOpstion is ERC721, Ownable {
         }
     }
 
+ struct getPBCTInfo {
+        bool direction;
+        int128 delta;
+        int128 t;
+        int128 B;
+        int128 K;
+        int128 l1Orl3;
+        int128 l2Orl4;
+        int128 omg;
+    }
     // 获取PBCT
     function getPBCT(
-        bool direction,
-        int128 delta,
-        int128 t,
-        int128 B,
-        int128 K,
-        int128 l1Orl3,
-        int128 l2Orl4,
-        int128 omg
+        getPBCTInfo memory _getPBCTInfo
     ) public pure returns (int128) {
-        uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
-        uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
-        int128 _tb = getTB(true, B, K);
-        int128 _a1 = ABDKMath64x64.div(_tb, K);
+        uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(_getPBCTInfo.l1Orl3, 1);
+        uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(_getPBCTInfo.l2Orl4, 1);
+        int128 _tb = getTB(true, _getPBCTInfo.B, _getPBCTInfo.K);
+        int128 _a1 = ABDKMath64x64.div(_tb, _getPBCTInfo.K);
         int128 _a1_l1 = ABDKMath64x64.pow(_a1, l1Orl3_uint256);
-        int128 _a1_w_l1 = ABDKMath64x64.mul(omg, _a1_l1);
+        int128 _a1_w_l1 = ABDKMath64x64.mul(_getPBCTInfo.omg, _a1_l1);
 
         int128 _a2_l2 = ABDKMath64x64.pow(_a1, l2Orl4_uint256);
-        int128 _a2_w_l2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, omg), _a2_l2);
+        int128 _a2_w_l2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, _getPBCTInfo.omg), _a2_l2);
 
-        if (!direction) {
-            _a1_w_l1 = ABDKMath64x64.div(omg, _a1_l1);
-            _a2_w_l2 = ABDKMath64x64.div(ABDKMath64x64.sub(1, omg), _a2_l2);
+        if (!_getPBCTInfo.direction) {
+            _a1_w_l1 = ABDKMath64x64.div(_getPBCTInfo.omg, _a1_l1);
+            _a2_w_l2 = ABDKMath64x64.div(ABDKMath64x64.sub(1, _getPBCTInfo.omg), _a2_l2);
         }
 
         int128 _a = ABDKMath64x64.add(_a1_w_l1, _a2_w_l2);
-        int128 _b = ABDKMath64x64.exp(ABDKMath64x64.mul(delta, t));
+        int128 _b = ABDKMath64x64.exp(ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t));
         int128 _pbct = ABDKMath64x64.div(_a, _b);
         return _pbct;
     }
