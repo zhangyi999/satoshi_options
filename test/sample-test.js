@@ -3,7 +3,7 @@ const { ethers } = require("hardhat");
 const BigNumber = require('bignumber.js');
 function getInt128(num) {
   let _num = (new BigNumber(num).multipliedBy(new BigNumber(2).pow(64))).toString(10);
-  console.log("_num", _num);
+  // console.log("_num", _num);
   return _num
 }
 
@@ -16,94 +16,98 @@ describe("Greeter", function () {
     await greeter.deployed();
 
     // greeter.
-    // expect(await greeter.SetConfig(
-    //   (new BigNumber(65000).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(55000).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(3).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(3).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(1).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(50).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(21).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(24).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(1).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(1).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(1).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    //   (new BigNumber(10000000000).multipliedBy(new BigNumber(2).pow(64))).toString(10),
-    // ));
+    expect(await greeter.SetConfig(
+      getInt128(65000),
+      getInt128(55000),
+      getInt128(3),
+      getInt128(3),
+      getInt128(1),
+      getInt128(50),
+      getInt128(21),
+      getInt128(24),
+      getInt128(1),
+      getInt128(1),
+      getInt128(1),
+      getInt128(10000000000),
+    ));
 
-    let tx = await greeter.SetLTable([
+    let tx = await greeter.SetLTable([[
       getInt128(1), //delta
       getInt128(2), //L1
       getInt128(3), //L2
       getInt128(3), //L3
       getInt128(3)//L4
-    ]
+    ]]
     );
     tx.wait()
 
-    // expect(await greeter.getUpOmg([
-    //   2 * 2 ** 64, //L1
-    //   2 * 2 ** 64, //L2
-    // ]
-    // )).to.equal("getUpOmg!");
+    let upOmg = await greeter.getUpOmg(
+      getInt128(2), //L1
+      getInt128(3), //L2
+    );
+    console.log("upOmg--", upOmg.toString());
+    let downOmg = await greeter.getUpOmg(
+      getInt128(2), //L3
+      getInt128(3), //L4
+    );
+    console.log("downOmg--", downOmg.toString())
 
-    // expect(await greeter.getDownOmg([
-    //   2 * 2 ** 64, //L3
-    //   2 * 2 ** 64, //L4
-    // ]
-    // )).to.equal("getDownOmg!");
 
-    // expect(await greeter.getPurchaseQuantity([
+    let purchaseQuantity = await greeter.getPurchaseQuantity([
+      true,// direction;
+      getInt128(2),// bk;
+      getInt128(1),// delta;
+      getInt128(2)// _i;
+    ])
+    console.log("purchaseQuantity--", purchaseQuantity.toString())
+
+    let TB = await greeter.getTB(
+      true,// direction;
+      getInt128(2),// bk;
+      getInt128(1),// delta;
+    )
+    console.log("TB--", TB.toString())
+
+    // let PBCT = await greeter.getPBCT([
     //   true,// direction;
-    //   2 * 2 ** 64,// bk;
-    //   2 * 2 ** 64,// delta;
-    //   2 * 2 ** 64// _i;
+    //   getInt128(1),// delta,
+    //   getInt128(1234),// t,
+    //   getInt128(65000),// B,
+    //   getInt128(62000),// K,
+    //   getInt128(2),// l1Orl3,
+    //   getInt128(3),// l2Orl4,
+    //   getInt128(3), //omg
     // ]
-    // )).to.equal("getPurchaseQuantity!");
+    // )
+    // console.log("PBCT--", PBCT.toString())
 
-    // expect(await greeter.getTB([
-    //   true,// direction;
-    //   2 * 2 ** 64,// bk;
-    //   3 * 2 ** 64,// delta;
-    // ]
-    // )).to.equal("getTB!");
+    let RL = await greeter.getRL([
+      getInt128(65000),// B;
+      getInt128(62000),// K,
+      getInt128(2),// l1Orl3,
+      getInt128(3),// l2Orl4,
+      getInt128(3), //omg
+    ]
+    )
+    console.log("RL--", RL.toString())
 
-    // expect(await greeter.getPBCT([
-    //   true,// direction;
-    //   3 * 2 ** 64,// delta,
-    //   1234 * 2 ** 64,// t,
-    //   65000 * 2 ** 64,// B,
-    //   62000 * 2 ** 64,// K,
-    //   2 * 2 ** 64,// l1Orl3,
-    //   2 * 2 ** 64,// l2Orl4,
-    //   2 * 2 ** 64, //omg
-    // ]
-    // )).to.equal("getPBCT!");
+    let Priceimpact = await greeter.getPriceimpact([
+      getInt128(3),// lpha;
+      getInt128(3),// delta,
+      getInt128(5),// rl;
+      getInt128(2),// Q;
+      getInt128(2),// pbct;
+    ]
+    )
+    console.log("Priceimpact--", Priceimpact.toString())
 
-    // expect(await greeter.getRL([
-    //   65000 * 2 ** 64,// B;
-    //   62000 * 2 ** 64,// K;
-    //   2 * 2 ** 64,// l1Orl3,
-    //   2 * 2 ** 64,// l2Orl4,
-    //   2 * 2 ** 64, //omg
-    // ]
-    // )).to.equal("getRL!");
-
-    // expect(await greeter.getPriceimpact([
-    //   3 * 2 ** 64,// lpha;
-    //   3 * 2 ** 64,// delta,
-    //   5 * 2 ** 64,// rl;
-    //   2 * 2 ** 64,// Q;
-    //   2 * 2 ** 64,// pbct;
-    // ]
-    // )).to.equal("getPriceimpact!");
-
-    // expect(await greeter.getLiquidationNum([
-    //   2 * 2 ** 64,// pbct;
-    //   2 * 2 ** 64,// Q;
-    //   5 * 2 ** 64,// rl;
-    //   5 * 2 ** 64,// priceimpact;
-    // ]
-    // )).to.equal("getLiquidationNum!");
+    let LiquidationNum = await greeter.getLiquidationNum([
+      getInt128(2),// pbct;
+      getInt128(2),// Q;
+      getInt128(5),// rl;
+      getInt128(5),// priceimpact;
+    ]
+    )
+    console.log("LiquidationNum--", LiquidationNum.toString())
   });
 });
