@@ -59,10 +59,9 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
     mapping(uint256 => NftData) private nftStore;
 
-    constructor(
-        string memory name_,
-        string memory symbol_
-    ) ERC721(name_, symbol_) {
+    constructor(string memory name_, string memory symbol_)
+        ERC721(name_, symbol_)
+    {
         // cppc = _cppc;
     }
 
@@ -105,7 +104,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     /**
     配置L表格
     */
-    function SetLTable(DeltaItem[] calldata _deltaItem) external onlyOwner {
+    function SetLTable(DeltaItem[] calldata _deltaItem) public onlyOwner {
         uint256 length = _deltaItem.length;
         require(length > 0);
         for (uint256 i = 0; i < length; i++) {
@@ -305,7 +304,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         }
     }
 
- struct getPBCTInfo {
+    struct getPBCTInfo {
         bool direction;
         int128 delta;
         int128 t;
@@ -315,10 +314,13 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 l2Orl4;
         int128 omg;
     }
+
     // 获取PBCT
-    function getPBCT(
-        getPBCTInfo memory _getPBCTInfo
-    ) public pure returns (int128) {
+    function getPBCT(getPBCTInfo memory _getPBCTInfo)
+        public
+        pure
+        returns (int128)
+    {
         uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(_getPBCTInfo.l1Orl3, 1);
         uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(_getPBCTInfo.l2Orl4, 1);
         int128 _tb = getTB(true, _getPBCTInfo.B, _getPBCTInfo.K);
@@ -327,15 +329,23 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 _a1_w_l1 = ABDKMath64x64.mul(_getPBCTInfo.omg, _a1_l1);
 
         int128 _a2_l2 = ABDKMath64x64.pow(_a1, l2Orl4_uint256);
-        int128 _a2_w_l2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, _getPBCTInfo.omg), _a2_l2);
+        int128 _a2_w_l2 = ABDKMath64x64.mul(
+            ABDKMath64x64.sub(1, _getPBCTInfo.omg),
+            _a2_l2
+        );
 
         if (!_getPBCTInfo.direction) {
             _a1_w_l1 = ABDKMath64x64.div(_getPBCTInfo.omg, _a1_l1);
-            _a2_w_l2 = ABDKMath64x64.div(ABDKMath64x64.sub(1, _getPBCTInfo.omg), _a2_l2);
+            _a2_w_l2 = ABDKMath64x64.div(
+                ABDKMath64x64.sub(1, _getPBCTInfo.omg),
+                _a2_l2
+            );
         }
 
         int128 _a = ABDKMath64x64.add(_a1_w_l1, _a2_w_l2);
-        int128 _b = ABDKMath64x64.exp(ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t));
+        int128 _b = ABDKMath64x64.exp(
+            ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t)
+        );
         int128 _pbct = ABDKMath64x64.div(_a, _b);
         return _pbct;
     }

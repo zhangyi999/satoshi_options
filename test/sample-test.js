@@ -1,6 +1,11 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const BigNumber = require('bignumber.js');
+function getInt128(num) {
+  let _num = (new BigNumber(num).multipliedBy(new BigNumber(2).pow(64))).toString(10);
+  console.log("_num", _num);
+  return _num
+}
 
 describe("Greeter", function () {
   it("Should return the new greeting once it's changed", async function () {
@@ -11,29 +16,30 @@ describe("Greeter", function () {
     await greeter.deployed();
 
     // greeter.
-    expect(await greeter.SetConfig(
-      new BigNumber(65000).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(55000).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(0.3).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(0.3).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(1).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(50.9686).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(21.51).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(24.15).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(0.5645).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(0.4355).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(0.01).multipliedBy(new BigNumber(2).pow(64)),
-      new BigNumber(10000000000).multipliedBy(new BigNumber(2).pow(64)),
-    )).to.equal("SetConfig!");
+    // expect(await greeter.SetConfig(
+    //   (new BigNumber(65000).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(55000).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(3).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(3).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(1).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(50).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(21).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(24).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(1).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(1).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(1).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    //   (new BigNumber(10000000000).multipliedBy(new BigNumber(2).pow(64))).toString(10),
+    // ));
 
-    // expect(await greeter.SetLTable([
-    //   1 * 2 ** 64, //delta
-    //   2 * 2 ** 64, //L1
-    //   2 * 2 ** 64, //L2
-    //   3 * 2 ** 64, //L3
-    //   3 * 2 ** 64,//L4
-    // ]
-    // )).to.equal("SetLTable!");
+    let tx = await greeter.SetLTable([
+      getInt128(1), //delta
+      getInt128(2), //L1
+      getInt128(3), //L2
+      getInt128(3), //L3
+      getInt128(3)//L4
+    ]
+    );
+    tx.wait()
 
     // expect(await greeter.getUpOmg([
     //   2 * 2 ** 64, //L1
