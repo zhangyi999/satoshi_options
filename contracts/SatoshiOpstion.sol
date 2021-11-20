@@ -60,11 +60,10 @@ contract SatoshiOpstion is ERC721, Ownable {
     mapping(uint256 => NftData) private nftStore;
 
     constructor(
-        address _cppc,
         string memory name_,
         string memory symbol_
     ) ERC721(name_, symbol_) {
-        cppc = _cppc;
+        // cppc = _cppc;
     }
 
     function totalSupply() external view returns (uint256) {
