@@ -376,16 +376,22 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 获取RL
     function getRL(bool direction, GetRlInfo memory _getRlInfo)
         public
-        pure
+        view
         returns (int128)
     {
+        console.log("__getRL");
         int128 _tb = getTB(true, _getRlInfo.B, _getRlInfo.K);
+        console.log("_tb");
+        console.logInt(_getRlInfo.B);
+        console.logInt(_getRlInfo.K);
         // uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
         // uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
         int128 _a1_l1 = ABDKMath64x64.pow(
             ABDKMath64x64.div(_tb, _getRlInfo.K),
             ABDKMath64x64.mulu(_getRlInfo.l1Orl3, 1)
         );
+        console.log("_a1_l1");
+        console.logInt(_a1_l1);
         int128 _a1 = ABDKMath64x64.mul(
             ABDKMath64x64.mul(_getRlInfo.l1Orl3, _getRlInfo.omg),
             _a1_l1
@@ -407,6 +413,8 @@ contract SatoshiOpstion is ERC721, Ownable {
             ABDKMath64x64.sub(1, _getRlInfo.omg),
             _a2_l2
         );
+        console.log("_b1");
+        console.logInt(_b1);
         if (!direction) {
             _a1 = ABDKMath64x64.div(
                 ABDKMath64x64.mul(_getRlInfo.l1Orl3, _getRlInfo.omg),
@@ -428,6 +436,10 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 _a = ABDKMath64x64.add(_a1, _a2);
         int128 _b = ABDKMath64x64.add(_b1, _b2);
 
+        console.log("_a_a");
+        console.logInt(_a);
+        console.log("_b_b");
+        console.logInt(_b);
         int128 _rl = ABDKMath64x64.div(_a, _b);
         return _rl;
     }
