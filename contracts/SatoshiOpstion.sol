@@ -13,33 +13,33 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 仓位id
     uint256 private _totalSupply;
     // 多单BTC价格
-    int128 upBtc = 0;
+    int128 upBtc = 0; //2**64
     // 空单BTC价格
-    int128 downBtc = 0;
+    int128 downBtc = 0; //2**64
     // 开仓费率
-    int128 depositFee = 3000; // 0.3 * 10000;
+    int128 depositFee; // 0.3 * 2**64;
     // 平仓费率
-    int128 withdrawFee = 3000; // 0.3 * 10000;
+    int128 withdrawFee; // 0.3 * 2**64;
 
-    int128 sigma = 10000; //1 * 10000; 大写Σ，小写σ
+    int128 sigma; //1 * 2**64; 大写Σ，小写σ
     // sigma = 2**64
-    int128 lambda = 509686; // 50.9686 * 10000; λ
-    // lambda = 50.9686 * 2**64 
-    int128 eta1 = 215100; //21.51 * 10000; η1
-    int128 eta2 = 241500; //24.15 * 10000; η2
-    int128 _p = 5645; //0.5645 * 10000;
-    int128 _q = 4355; //0.4355 * 10000;
+    int128 lambda; // 50.9686 * 2**64; λ
+    // lambda = 50.9686 * 2**64
+    int128 eta1; //21.51 * 2**64; η1
+    int128 eta2; //24.15 * 2**64; η2
+    int128 _p; //0.5645 * 2**64;
+    int128 _q; //0.4355 * 2**64;
 
-    int128 alpha = 600000; //6 * 10000
-    int128 _pcpct = 100; //0.01*10000 pccp价格
-    int128 _V = 1000000000000000; //10000000000*10000 btc全球总交易量
+    int128 alpha; //6 * 2**64
+    int128 _pcpct; //0.01*2**64 pccp价格
+    int128 _V; //10000000000*2**64 btc全球总交易量
 
     struct DeltaItem {
-        int128 delta; //10**10  2**64  int128
-        int128 L1; //10**10 1.2 = 1.2 * 2**64
-        int128 L2; //10**10
-        int128 L3; //10**10
-        int128 L4; //10**10
+        int128 delta; //2**64  int128
+        int128 L1; //2**64  int128
+        int128 L2; //2**64  int128
+        int128 L3; //2**64  int128
+        int128 L4; //2**64  int128
     }
     mapping(int128 => DeltaItem) private _deltaTable;
 
@@ -59,12 +59,10 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
     mapping(uint256 => NftData) private nftStore;
 
-    constructor(
-        address _cppc,
-        string memory name_,
-        string memory symbol_
-    ) ERC721(name_, symbol_) {
-        cppc = _cppc;
+    constructor(string memory name_, string memory symbol_)
+        ERC721(name_, symbol_)
+    {
+        // cppc = _cppc;
     }
 
     function totalSupply() external view returns (uint256) {
@@ -106,7 +104,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     /**
     配置L表格
     */
-    function SetLTable(DeltaItem[] calldata _deltaItem) external onlyOwner {
+    function SetLTable(DeltaItem[] calldata _deltaItem) public onlyOwner {
         uint256 length = _deltaItem.length;
         require(length > 0);
         for (uint256 i = 0; i < length; i++) {
@@ -192,13 +190,13 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 _eta1_128 = eta1;
         // int128 _l1_128 = ABDKMath64x64.fromUInt(l1);
         // int128 _l2_128 = ABDKMath64x64.fromUInt(l2);
-        int128 _a = ABDKMath64x64.sub(_eta1_128, l1);
-        int128 _b = _eta1_128;
-        int128 _a1 = l2;
-        int128 _b1 = ABDKMath64x64.sub(l2, l1);
+        // int128 _a = ABDKMath64x64.sub(_eta1_128, l1);
+        // int128 _b = _eta1_128;
+        // int128 _a1 = l2;
+        // int128 _b1 = ABDKMath64x64.sub(l2, l1);
         int128 _omg = ABDKMath64x64.mul(
-            ABDKMath64x64.div(_a, _b),
-            ABDKMath64x64.div(_a1, _b1)
+            ABDKMath64x64.div(ABDKMath64x64.sub(_eta1_128, l1), _eta1_128),
+            ABDKMath64x64.div(l2, ABDKMath64x64.sub(l2, l1))
         );
         return _omg;
     }
@@ -206,8 +204,6 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 获取熊证Omg值
     function getDownOmg(int128 l3, int128 l4) public view returns (int128) {
         int128 _eta2_128 = eta2;
-        // int128 _l1_128 = ABDKMath64x64.fromUInt(l1);
-        // int128 _l2_128 = ABDKMath64x64.fromUInt(l2);
         int128 _a = ABDKMath64x64.sub(_eta2_128, l3);
         int128 _b = _eta2_128;
         int128 _a1 = l4;
@@ -220,39 +216,57 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     // 获取开仓算数量
-    struct Qu {
+    struct getPurchaseQuantityInfo {
         bool direction;
         int128 bk;
         int128 delta;
         int128 _i;
     }
+
     function getPurchaseQuantity(
-        Qu memory _qu
+        getPurchaseQuantityInfo memory _getPurchaseQuantityInfo
     ) public view returns (int128) {
-        DeltaItem memory deltaItem = getDeltaTable(_qu.delta);
-        
+        DeltaItem memory deltaItem = getDeltaTable(
+            _getPurchaseQuantityInfo.delta
+        );
+
         uint256 l1_uint256 = ABDKMath64x64.mulu(deltaItem.L1, 1);
         uint256 l2_uint256 = ABDKMath64x64.mulu(deltaItem.L2, 1);
         uint256 l3_uint256 = ABDKMath64x64.mulu(deltaItem.L3, 1);
         uint256 l4_uint256 = ABDKMath64x64.mulu(deltaItem.L4, 1);
 
         int128 omg = getUpOmg(deltaItem.L1, deltaItem.L2);
-        if (!_qu.direction) {
+        if (!_getPurchaseQuantityInfo.direction) {
             omg = getDownOmg(deltaItem.L3, deltaItem.L4);
         }
-        int128 bkPowL1 = ABDKMath64x64.pow(_qu.bk, l1_uint256);
-        int128 bkPowL2 = ABDKMath64x64.pow(_qu.bk, l2_uint256);
-        int128 bkPowL3 = ABDKMath64x64.pow(_qu.bk, l3_uint256);
-        int128 bkPowL4 = ABDKMath64x64.pow(_qu.bk, l4_uint256);
+        int128 bkPowL1 = ABDKMath64x64.pow(
+            _getPurchaseQuantityInfo.bk,
+            l1_uint256
+        );
+        int128 bkPowL2 = ABDKMath64x64.pow(
+            _getPurchaseQuantityInfo.bk,
+            l2_uint256
+        );
+        int128 bkPowL3 = ABDKMath64x64.pow(
+            _getPurchaseQuantityInfo.bk,
+            l3_uint256
+        );
+        int128 bkPowL4 = ABDKMath64x64.pow(
+            _getPurchaseQuantityInfo.bk,
+            l4_uint256
+        );
         int128 omg1 = ABDKMath64x64.mul(omg, bkPowL1);
         int128 omg2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, omg), bkPowL2);
 
-        if (!_qu.direction) {
+        if (!_getPurchaseQuantityInfo.direction) {
             omg1 = ABDKMath64x64.div(omg, bkPowL3);
             omg2 = ABDKMath64x64.div(ABDKMath64x64.sub(1, omg), bkPowL4);
         }
 
-        int128 _Q = ABDKMath64x64.div(_qu._i, ABDKMath64x64.add(omg1, omg2));
+        int128 _Q = ABDKMath64x64.div(
+            _getPurchaseQuantityInfo._i,
+            ABDKMath64x64.add(omg1, omg2)
+        );
         return _Q;
     }
 
@@ -273,7 +287,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         bool direction,
         int128 B,
         int128 K
-    ) private pure returns (int128) {
+    ) public pure returns (int128) {
         uint256 B_uint256 = ABDKMath64x64.mulu(B, 1);
         uint256 K_uint256 = ABDKMath64x64.mulu(K, 1);
         if (direction) {
@@ -290,121 +304,187 @@ contract SatoshiOpstion is ERC721, Ownable {
         }
     }
 
-    // 获取PBCT
-    function getPBCT(
-        bool direction,
-        int128 delta,
-        int128 t,
-        int128 B,
-        int128 K,
-        int128 l1Orl3,
-        int128 l2Orl4,
-        int128 omg
-    ) private pure returns (int128) {
-        uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
-        uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
-        int128 _tb = getTB(true, B, K);
-        int128 _a1 = ABDKMath64x64.div(_tb, K);
-        int128 _a1_l1 = ABDKMath64x64.pow(_a1, l1Orl3_uint256);
-        int128 _a1_w_l1 = ABDKMath64x64.mul(omg, _a1_l1);
-
-        int128 _a2_l2 = ABDKMath64x64.pow(_a1, l2Orl4_uint256);
-        int128 _a2_w_l2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, omg), _a2_l2);
-
-        if (!direction) {
-            _a1_w_l1 = ABDKMath64x64.div(omg, _a1_l1);
-            _a2_w_l2 = ABDKMath64x64.div(ABDKMath64x64.sub(1, omg), _a2_l2);
-        }
-
-        int128 _a = ABDKMath64x64.add(_a1_w_l1, _a2_w_l2);
-        int128 _b = ABDKMath64x64.exp(ABDKMath64x64.mul(delta, t));
-        int128 _pbct = ABDKMath64x64.div(_a, _b);
-        return _pbct;
+    struct getPBCTInfo {
+        bool direction;
+        int128 delta;
+        int128 t;
+        int128 B;
+        int128 K;
+        int128 l1Orl3;
+        int128 l2Orl4;
+        int128 omg;
     }
 
-    // 获取RL
-    function getRL(
-        bool direction,
-        int128 B,
-        int128 K,
-        int128 l1Orl3,
-        int128 l2Orl4,
-        int128 omg
-    ) public pure returns (int128) {
-        int128 _tb = getTB(true, B, K);
-        uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
-        uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
-        int128 _a1_l1 = ABDKMath64x64.pow(
-            ABDKMath64x64.div(_tb, K),
-            l1Orl3_uint256
-        );
-        int128 _a1 = ABDKMath64x64.mul(ABDKMath64x64.mul(l1Orl3, omg), _a1_l1);
+    // 获取PBCT
+    function getPBCT(getPBCTInfo memory _getPBCTInfo)
+        public
+        pure
+        returns (int128)
+    {
+        uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(_getPBCTInfo.l1Orl3, 1);
+        uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(_getPBCTInfo.l2Orl4, 1);
+        int128 _tb = getTB(true, _getPBCTInfo.B, _getPBCTInfo.K);
+        int128 _a1 = ABDKMath64x64.div(_tb, _getPBCTInfo.K);
+        int128 _a1_l1 = ABDKMath64x64.pow(_a1, l1Orl3_uint256);
+        int128 _a1_w_l1 = ABDKMath64x64.mul(_getPBCTInfo.omg, _a1_l1);
 
-        int128 _a2_l2 = ABDKMath64x64.pow(
-            ABDKMath64x64.div(_tb, K),
-            l2Orl4_uint256
-        );
-        int128 _a2 = ABDKMath64x64.mul(
-            ABDKMath64x64.mul(l2Orl4, ABDKMath64x64.sub(1, omg)),
+        int128 _a2_l2 = ABDKMath64x64.pow(_a1, l2Orl4_uint256);
+        int128 _a2_w_l2 = ABDKMath64x64.mul(
+            ABDKMath64x64.sub(1, _getPBCTInfo.omg),
             _a2_l2
         );
-        if (!direction) {
-            _a1 = ABDKMath64x64.div(ABDKMath64x64.mul(l1Orl3, omg), _a1_l1);
-            _a2 = ABDKMath64x64.div(
-                ABDKMath64x64.mul(l2Orl4, ABDKMath64x64.sub(1, omg)),
+
+        if (!_getPBCTInfo.direction) {
+            _a1_w_l1 = ABDKMath64x64.div(_getPBCTInfo.omg, _a1_l1);
+            _a2_w_l2 = ABDKMath64x64.div(
+                ABDKMath64x64.sub(1, _getPBCTInfo.omg),
                 _a2_l2
             );
         }
 
-        int128 _a = ABDKMath64x64.add(_a1, _a2);
+        int128 _a = ABDKMath64x64.add(_a1_w_l1, _a2_w_l2);
+        int128 _b = ABDKMath64x64.exp(
+            ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t)
+        );
+        int128 _pbct = ABDKMath64x64.div(_a, _b);
+        return _pbct;
+    }
 
-        int128 _b1 = ABDKMath64x64.mul(omg, _a1_l1);
-        int128 _b2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, omg), _a2_l2);
+    struct GetRlInfo {
+        int128 B;
+        int128 K;
+        int128 l1Orl3;
+        int128 l2Orl4;
+        int128 omg;
+    }
+
+    // 获取RL
+    function getRL(bool direction, GetRlInfo memory _getRlInfo)
+        public
+        pure
+        returns (int128)
+    {
+        int128 _tb = getTB(true, _getRlInfo.B, _getRlInfo.K);
+        // uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
+        // uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
+        int128 _a1_l1 = ABDKMath64x64.pow(
+            ABDKMath64x64.div(_tb, _getRlInfo.K),
+            ABDKMath64x64.mulu(_getRlInfo.l1Orl3, 1)
+        );
+        int128 _a1 = ABDKMath64x64.mul(
+            ABDKMath64x64.mul(_getRlInfo.l1Orl3, _getRlInfo.omg),
+            _a1_l1
+        );
+
+        int128 _a2_l2 = ABDKMath64x64.pow(
+            ABDKMath64x64.div(_tb, _getRlInfo.K),
+            ABDKMath64x64.mulu(_getRlInfo.l2Orl4, 1)
+        );
+        int128 _a2 = ABDKMath64x64.mul(
+            ABDKMath64x64.mul(
+                _getRlInfo.l2Orl4,
+                ABDKMath64x64.sub(1, _getRlInfo.omg)
+            ),
+            _a2_l2
+        );
+        int128 _b1 = ABDKMath64x64.mul(_getRlInfo.omg, _a1_l1);
+        int128 _b2 = ABDKMath64x64.mul(
+            ABDKMath64x64.sub(1, _getRlInfo.omg),
+            _a2_l2
+        );
         if (!direction) {
-            _b1 = ABDKMath64x64.div(omg, _a1_l1);
-            _b2 = ABDKMath64x64.div(ABDKMath64x64.sub(1, omg), _a2_l2);
+            _a1 = ABDKMath64x64.div(
+                ABDKMath64x64.mul(_getRlInfo.l1Orl3, _getRlInfo.omg),
+                _a1_l1
+            );
+            _a2 = ABDKMath64x64.div(
+                ABDKMath64x64.mul(
+                    _getRlInfo.l2Orl4,
+                    ABDKMath64x64.sub(1, _getRlInfo.omg)
+                ),
+                _a2_l2
+            );
+            _b1 = ABDKMath64x64.div(_getRlInfo.omg, _a1_l1);
+            _b2 = ABDKMath64x64.div(
+                ABDKMath64x64.sub(1, _getRlInfo.omg),
+                _a2_l2
+            );
         }
+        int128 _a = ABDKMath64x64.add(_a1, _a2);
         int128 _b = ABDKMath64x64.add(_b1, _b2);
 
         int128 _rl = ABDKMath64x64.div(_a, _b);
         return _rl;
     }
 
+    struct GetPriceimpactInfo {
+        int128 lpha;
+        int128 delt;
+        int128 rl;
+        int128 Q;
+        int128 pbct;
+    }
+
     // 获取Priceimpact
-    function getPriceimpact(
-        int128 lpha,
-        int128 delt,
-        int128 rl,
-        int128 Q,
-        int128 pbct
-    ) public view returns (int128) {
-        int128 a1 = ABDKMath64x64.log_2(ABDKMath64x64.div(_pcpct, _V));
-        int128 a2 = ABDKMath64x64.log_2(
-            ABDKMath64x64.mul(rl, ABDKMath64x64.mul(Q, pbct))
-        );
+    function getPriceimpact(GetPriceimpactInfo memory _GetPriceimpactInfo)
+        public
+        view
+        returns (int128)
+    {
+        // int128 a1 = ABDKMath64x64.log_2(ABDKMath64x64.div(_pcpct, _V));
+        // int128 a2 = ABDKMath64x64.log_2(
+        //     ABDKMath64x64.mul(rl, ABDKMath64x64.mul(Q, pbct))
+        // );
         int128 _priceimpact = ABDKMath64x64.mul(
-            lpha,
-            ABDKMath64x64.mul(delt, ABDKMath64x64.mul(a1, a2))
+            _GetPriceimpactInfo.lpha,
+            ABDKMath64x64.mul(
+                _GetPriceimpactInfo.delt,
+                ABDKMath64x64.mul(
+                    ABDKMath64x64.log_2(ABDKMath64x64.div(_pcpct, _V)),
+                    ABDKMath64x64.log_2(
+                        ABDKMath64x64.mul(
+                            _GetPriceimpactInfo.rl,
+                            ABDKMath64x64.mul(
+                                _GetPriceimpactInfo.Q,
+                                _GetPriceimpactInfo.pbct
+                            )
+                        )
+                    )
+                )
+            )
         );
         return _priceimpact;
     }
 
+    struct getLiquidationNumInfo {
+        int128 pbct;
+        int128 Q;
+        int128 rl;
+        int128 priceimpact;
+    }
+
     // 获取平仓价值
     function getLiquidationNum(
-        int128 pbct,
-        int128 Q,
-        int128 rl,
-        int128 priceimpact
-    ) private view returns (int128) {
+        getLiquidationNumInfo memory _getLiquidationNumInfo
+    ) public view returns (int128) {
         int128 _a = ABDKMath64x64.mul(
             ABDKMath64x64.sub(1, withdrawFee),
-            ABDKMath64x64.mul(pbct, Q)
+            ABDKMath64x64.mul(
+                _getLiquidationNumInfo.pbct,
+                _getLiquidationNumInfo.Q
+            )
         );
-        int128 _b_1 = ABDKMath64x64.mul(rl, priceimpact);
-        uint256 _b_1_uint256 = ABDKMath64x64.mulu(_b_1, 1);
-        uint256 _b_2_uint256 = ABDKMath64x64.mulu(1, 1); //toDo 0.1数值转换
+        int128 _b_1 = ABDKMath64x64.mul(
+            _getLiquidationNumInfo.rl,
+            _getLiquidationNumInfo.priceimpact
+        );
+        // uint256 _b_1_uint256 = ABDKMath64x64.mulu(_b_1, 1);
+        // uint256 _b_2_uint256 = ABDKMath64x64.mulu(1, 1); //toDo 0.1数值转换
 
-        uint256 _b_3_uint256 = Math.min(_b_1_uint256, _b_2_uint256);
+        uint256 _b_3_uint256 = Math.min(
+            ABDKMath64x64.mulu(_b_1, 1),
+            ABDKMath64x64.mulu(1 * 2**64, 1) //toDo 0.1数值转换
+        );
         int128 _b_3_uint256_int128 = ABDKMath64x64.fromUInt(_b_3_uint256);
         int128 _b = ABDKMath64x64.add(1, _b_3_uint256_int128);
         int128 _liquidationNum = ABDKMath64x64.div(_a, _b);
