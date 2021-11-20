@@ -36,7 +36,7 @@ contract SatoshiOpstion is ERC721, Ownable {
 
     struct DeltaItem {
         int128 delta; //10**10  2**64  int128
-        int128 L1; //10**10
+        int128 L1; //10**10 1.2 = 1.2 * 2**64
         int128 L2; //10**10
         int128 L3; //10**10
         int128 L4; //10**10
