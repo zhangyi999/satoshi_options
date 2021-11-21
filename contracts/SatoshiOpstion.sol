@@ -54,6 +54,8 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 openPrice;
         bool direction;
         bool isEnable;
+        int128 bk;
+        int128 K;
     }
     mapping(uint256 => NftData) private nftStore;
 
@@ -137,6 +139,22 @@ contract SatoshiOpstion is ERC721, Ownable {
         }
     }
 
+    modifier isMyNFTPid(uint256 _pid) {
+        uint256[] memory pids = _idBalance[_msgSender()];
+        uint256 length = pids.length;
+        bool isMyPid = false;
+        if (length > 0) {
+            for (uint256 id = 0; id < length; ++id) {
+                if (pids[id] == _pid) {
+                    isMyPid = true;
+                }
+            }
+        }
+        if (isMyPid) {
+            _;
+        }
+    }
+
     function getCppcInfo(uint256 _pid) external view returns (NftData memory) {
         NftData storage cppcData = nftStore[_pid];
         return cppcData;
@@ -170,6 +188,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         } else {
             _omg = getDownOmg(delta);
         }
+        int128 K = getBk(bk);
         getPurchaseQuantityInfo
             memory _getPurchaseQuantityInfo = getPurchaseQuantityInfo(
                 direction,
@@ -193,6 +212,8 @@ contract SatoshiOpstion is ERC721, Ownable {
         nftData.cppcNum = cppcNum;
         nftData.createTime = block.timestamp;
         nftData.openPrice = currBtc;
+        nftData.bk = bk;
+        nftData.K = K;
         nftData.isEnable = true;
 
         return pid;
@@ -265,22 +286,6 @@ contract SatoshiOpstion is ERC721, Ownable {
         if (!_getPurchaseQuantityInfo.direction) {
             omg = getDownOmg(delta);
         }
-        // int128 bkPowL1 = ABDKMath64x64.pow(
-        //     _getPurchaseQuantityInfo.bk,
-        //     l1_uint256
-        // );
-        // int128 bkPowL2 = ABDKMath64x64.pow(
-        //     _getPurchaseQuantityInfo.bk,
-        //     l2_uint256
-        // );
-        // int128 bkPowL3 = ABDKMath64x64.pow(
-        //     _getPurchaseQuantityInfo.bk,
-        //     l3_uint256
-        // );
-        // int128 bkPowL4 = ABDKMath64x64.pow(
-        //     _getPurchaseQuantityInfo.bk,
-        //     l4_uint256
-        // );
         int128 omg1 = ABDKMath64x64.mul(
             omg,
             ABDKMath64x64.pow(_getPurchaseQuantityInfo.bk, l1_uint256)
@@ -315,18 +320,31 @@ contract SatoshiOpstion is ERC721, Ownable {
     function Withdraw(uint256 _pid, uint256 btcPrice)
         public
         view
-        isCppcAddress(_pid)
+        isMyNFTPid(_pid)
     {
         NftData memory nftData = this.getCppcInfo(_pid);
         nftData.isEnable = false;
+        bool direction = nftData.direction;
+        int128 delta = nftData.delta;
+        int128 createTime = ABDKMath64x64.fromUInt(nftData.createTime);
+        int128 bk = nftData.bk;
+        int128 cppcNum = nftData.cppcNum;
+        int128 K = nftData.K;
+        getPBCTInfo memory _getPBCTInfo = getPBCTInfo(
+            direction,
+            bk,
+            delta,
+            cppcNum,
+            K
+        );
+        int128 pbct = getPBCT(_getPBCTInfo);
     }
 
     function downLiquidation() private view returns (int128) {}
 
     //  获取TB
-    function getTB(bool direction, int128 BK) public view returns (int128) {
+    function getTB(bool direction, int128 K) public view returns (int128) {
         uint256 B_uint256 = ABDKMath64x64.mulu(currBtc, 1);
-        int128 K = getBk(BK);
         uint256 K_uint256 = ABDKMath64x64.mulu(K, 1);
         if (direction) {
             // 牛证
@@ -347,6 +365,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 delta;
         int128 t;
         int128 BK;
+        int128 K;
     }
 
     // 获取PBCT
@@ -374,8 +393,8 @@ contract SatoshiOpstion is ERC721, Ownable {
         // int128 K = getBk(_getPBCTInfo.BK);
         // int128 _tb = getTB(true, _getPBCTInfo.BK);
         int128 _a1 = ABDKMath64x64.div(
-            getTB(true, _getPBCTInfo.BK),
-            getBk(_getPBCTInfo.BK)
+            getTB(true, _getPBCTInfo.K),
+            _getPBCTInfo.K
         );
         int128 _a1_l1 = ABDKMath64x64.pow(_a1, ABDKMath64x64.mulu(l1Orl3, 1));
         int128 _a1_w_l1 = ABDKMath64x64.mul(omg, _a1_l1);
@@ -412,6 +431,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         bool direction;
         int128 delta;
         int128 BK;
+        int128 K;
     }
 
     // 获取RL
@@ -434,18 +454,18 @@ contract SatoshiOpstion is ERC721, Ownable {
             omg = getDownOmg(_getRlInfo.delta);
         }
 
-        int128 K = getBk(_getRlInfo.BK);
-        int128 _tb = getTB(true, _getRlInfo.BK);
+        // int128 K = getBk(_getRlInfo.BK);
+        int128 _tb = getTB(true, _getRlInfo.K);
         // uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
         // uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
         int128 _a1_l1 = ABDKMath64x64.pow(
-            ABDKMath64x64.div(_tb, K),
+            ABDKMath64x64.div(_tb, _getRlInfo.K),
             ABDKMath64x64.mulu(l1Orl3, 1)
         );
         int128 _a1 = ABDKMath64x64.mul(ABDKMath64x64.mul(l1Orl3, omg), _a1_l1);
 
         int128 _a2_l2 = ABDKMath64x64.pow(
-            ABDKMath64x64.div(_tb, K),
+            ABDKMath64x64.div(_tb, _getRlInfo.K),
             ABDKMath64x64.mulu(l2Orl4, 1)
         );
         int128 _a2 = ABDKMath64x64.mul(

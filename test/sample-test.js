@@ -99,7 +99,7 @@ describe("Greeter", function () {
 
     let TB = await greeter.getTB(
       true,// direction;
-      getInt128(2)// bk;
+      getInt128(60000)// K;
     )
     console.log("TB--", TB.toString())
 
@@ -116,6 +116,7 @@ describe("Greeter", function () {
       true,// direction;
       getInt128(ltable[0]["delta"]),// delta,
       getInt128(2),// BK;
+      getInt128(60000), // K
     ]
     )
     console.log("RL--", RL.toString())
