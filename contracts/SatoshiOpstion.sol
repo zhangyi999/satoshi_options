@@ -12,7 +12,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     address public cppc;
 
     // 仓位id
-    uint256 private _totalSupply;
+    uint256 private _totalSupply = 0;
 
     int128 currBtc; //当前BTC价格
     // 开仓费率
@@ -535,7 +535,11 @@ contract SatoshiOpstion is ERC721, Ownable {
 
     function _mintNft(address _to) internal returns (uint256) {
         _mint(_to, _totalSupply);
-        return _totalSupply += 1;
+        // console.log("_totalSupply");
+        // _totalSupply = _totalSupply + 1;
+        // console.logUint(_totalSupply);
+        return _totalSupply++;
+        // return _totalSupply;
     }
 
     // 记录 id

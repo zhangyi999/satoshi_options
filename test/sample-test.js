@@ -143,6 +143,7 @@ describe("Greeter", function () {
       getInt128(2),// bk;
       getInt128(500),// cppcNum;
     )
+    open.wait();
     console.log("open--", open)
 
     // 获取持仓
@@ -150,7 +151,7 @@ describe("Greeter", function () {
     const pid = NftDatas[0].pid.toString()
     const cppcNum = NftDatas[0].cppcNum.toString()
     const createTime = NftDatas[0].createTime.toString()
-    console.log("NftDatas--", pid, cppcNum, createTime)
+    console.log("NftDatas--", NftDatas, pid, cppcNum, createTime)
 
   });
 
