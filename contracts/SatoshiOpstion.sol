@@ -376,6 +376,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         // int128 _b = ABDKMath64x64.exp_2(
         //     ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t)
         // );
+        console.log("_getPBCTInfo.delta %s | _getPBCTInfo.t %s", uint128(_getPBCTInfo.delta), uint128(_getPBCTInfo.t));
         int128 _deltaT = ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t);
         console.log("_deltaT");
         console.logInt(_deltaT);

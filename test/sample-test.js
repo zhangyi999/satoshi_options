@@ -103,14 +103,14 @@ describe("Greeter", function () {
     )
     console.log("TB--", TB.toString())
 
-    // let PBCT = await greeter.getPBCT([
-    //   true,// direction;
-    //   getInt128(ltable[0]["delta"]),// delta,
-    //   getInt128(123456),// t,
-    //   getInt128(2),// BK,
-    // ]
-    // )
-    // console.log("PBCT--", PBCT.toString())
+    let PBCT = await greeter.getPBCT([
+      true,// direction;
+      getInt128(ltable[0]["delta"]),// delta,
+      getInt128(123456),// t,
+      getInt128(2),// BK,
+    ]
+    )
+    console.log("PBCT--", PBCT.toString())
 
     let RL = await greeter.getRL(true, [
       true,// direction;
