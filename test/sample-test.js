@@ -108,15 +108,13 @@ describe("Greeter", function () {
     // )
     // console.log("PBCT--", PBCT.toString())
 
-    // let RL = await greeter.getRL(true, [
-    //   getInt128(65000),// B;
-    //   getInt128(62000),// K,
-    //   getInt128(2),// l1Orl3,
-    //   getInt128(3),// l2Orl4,
-    //   getInt128(3), //omg
-    // ]
-    // )
-    // console.log("RL--", RL.toString())
+    let RL = await greeter.getRL(true, [
+      true,// direction;
+      getInt128(ltable[0]["delta"]),// delta,
+      getInt128(2),// BK;
+    ]
+    )
+    console.log("RL--", RL.toString())
 
     //   let Priceimpact = await greeter.getPriceimpact([
     //     getInt128(3),// lpha;

@@ -384,10 +384,9 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     struct GetRlInfo {
+        bool direction;
+        int128 delta;
         int128 BK;
-        int128 l1Orl3;
-        int128 l2Orl4;
-        int128 omg;
     }
 
     // 获取RL
@@ -396,52 +395,51 @@ contract SatoshiOpstion is ERC721, Ownable {
         view
         returns (int128)
     {
+        int128 l1Orl3;
+        int128 l2Orl4;
+        int128 omg;
+        DeltaItem memory _DeltaItem = getDeltaTable(_getRlInfo.delta);
+        if (_getRlInfo.direction) {
+            l1Orl3 = _DeltaItem.L1;
+            l2Orl4 = _DeltaItem.L2;
+            omg = getUpOmg(_getRlInfo.delta);
+        } else {
+            l1Orl3 = _DeltaItem.L3;
+            l2Orl4 = _DeltaItem.L4;
+            omg = getDownOmg(_getRlInfo.delta);
+        }
+
         int128 K = getBk(_getRlInfo.BK);
         int128 _tb = getTB(true, _getRlInfo.BK);
         // uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
         // uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
         int128 _a1_l1 = ABDKMath64x64.pow(
             ABDKMath64x64.div(_tb, K),
-            ABDKMath64x64.mulu(_getRlInfo.l1Orl3, 1)
+            ABDKMath64x64.mulu(l1Orl3, 1)
         );
-        int128 _a1 = ABDKMath64x64.mul(
-            ABDKMath64x64.mul(_getRlInfo.l1Orl3, _getRlInfo.omg),
-            _a1_l1
-        );
+        int128 _a1 = ABDKMath64x64.mul(ABDKMath64x64.mul(l1Orl3, omg), _a1_l1);
 
         int128 _a2_l2 = ABDKMath64x64.pow(
             ABDKMath64x64.div(_tb, K),
-            ABDKMath64x64.mulu(_getRlInfo.l2Orl4, 1)
+            ABDKMath64x64.mulu(l2Orl4, 1)
         );
         int128 _a2 = ABDKMath64x64.mul(
-            ABDKMath64x64.mul(
-                _getRlInfo.l2Orl4,
-                ABDKMath64x64.sub(1, _getRlInfo.omg)
-            ),
+            ABDKMath64x64.mul(l2Orl4, ABDKMath64x64.sub(1 * 2**64, omg)),
             _a2_l2
         );
-        int128 _b1 = ABDKMath64x64.mul(_getRlInfo.omg, _a1_l1);
+        int128 _b1 = ABDKMath64x64.mul(omg, _a1_l1);
         int128 _b2 = ABDKMath64x64.mul(
-            ABDKMath64x64.sub(1, _getRlInfo.omg),
+            ABDKMath64x64.sub(1 * 2**64, omg),
             _a2_l2
         );
         if (!direction) {
-            _a1 = ABDKMath64x64.div(
-                ABDKMath64x64.mul(_getRlInfo.l1Orl3, _getRlInfo.omg),
-                _a1_l1
-            );
+            _a1 = ABDKMath64x64.div(ABDKMath64x64.mul(l1Orl3, omg), _a1_l1);
             _a2 = ABDKMath64x64.div(
-                ABDKMath64x64.mul(
-                    _getRlInfo.l2Orl4,
-                    ABDKMath64x64.sub(1, _getRlInfo.omg)
-                ),
+                ABDKMath64x64.mul(l2Orl4, ABDKMath64x64.sub(1 * 2**64, omg)),
                 _a2_l2
             );
-            _b1 = ABDKMath64x64.div(_getRlInfo.omg, _a1_l1);
-            _b2 = ABDKMath64x64.div(
-                ABDKMath64x64.sub(1, _getRlInfo.omg),
-                _a2_l2
-            );
+            _b1 = ABDKMath64x64.div(omg, _a1_l1);
+            _b2 = ABDKMath64x64.div(ABDKMath64x64.sub(1 * 2**64, omg), _a2_l2);
         }
         int128 _a = ABDKMath64x64.add(_a1, _a2);
         int128 _b = ABDKMath64x64.add(_b1, _b2);
