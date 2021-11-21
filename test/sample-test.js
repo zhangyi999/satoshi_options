@@ -18,6 +18,8 @@ const eta1 = 21.51;
 const eta2 = 24.15;
 const p = 0.5645;
 const q = 0.4355;
+const phi = 0.00000015;
+const pcpct = 0.01;
 const ltable = [
   {
     delta: "2.000000001",
@@ -55,8 +57,10 @@ describe("Greeter", function () {
       getInt128(eta2),
       getInt128(p),
       getInt128(q),
-      getInt128(1),
-      getInt128(10000000000),
+      getInt128(phi),
+      getInt128(pcpct),
+      getInt128(r),
+      // getInt128(10000000000),
     ));
 
     const LTable = ltable.map((item) => {
@@ -116,23 +120,20 @@ describe("Greeter", function () {
     )
     console.log("RL--", RL.toString())
 
-    //   let Priceimpact = await greeter.getPriceimpact([
-    //     getInt128(3),// lpha;
-    //     getInt128(3),// delta,
-    //     getInt128(5),// rl;
-    //     getInt128(2),// Q;
-    //     getInt128(2),// pbct;
-    //   ]
-    //   )
-    //   console.log("Priceimpact--", Priceimpact.toString())
+    let Priceimpact = await greeter.getPriceimpact([
+      "49149741625773706179",// rl;
+      "49149741625773706179",// pbct;
+      getInt128(2),// Q;
+    ]
+    )
+    console.log("Priceimpact--", Priceimpact.toString())
 
-    //   let LiquidationNum = await greeter.getLiquidationNum([
-    //     getInt128(2),// pbct;
-    //     getInt128(2),// Q;
-    //     getInt128(5),// rl;
-    //     getInt128(5),// priceimpact;
-    //   ]
-    //   )
-    //   console.log("LiquidationNum--", LiquidationNum.toString())
+    let LiquidationNum = await greeter.getLiquidationNum([
+      "49149741625773706179",// pbct;
+      getInt128(2),// Q;
+      "49149741625773706179",// rl;
+      getInt128(10591111237041),// priceimpact;
+    ])
+    console.log("LiquidationNum--", LiquidationNum.toString())
   });
 });

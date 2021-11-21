@@ -27,9 +27,11 @@ contract SatoshiOpstion is ERC721, Ownable {
     int128 _p; //
     int128 _q; //
 
-    int128 alpha; //
+    int128 phi; //ϕ
+    // int128 alpha; //
     int128 _pcpct; // pccp价格
-    int128 _V; //10000000000*2**64 btc全球总交易量
+    int128 r; //SettlementBTCPrice 参数 0.03
+    // int128 _V; //10000000000*2**64 btc全球总交易量
 
     struct DeltaItem {
         int128 delta; //2**64  int128
@@ -80,9 +82,14 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 _eta2,
         int128 __p,
         int128 __q,
+        int128 _phi,
         int128 __pcpct,
-        int128 __V
-    ) public onlyOwner {
+        int128 _r
+    )
+        public
+        // int128 __V
+        onlyOwner
+    {
         currBtc = _currBtc;
         depositFee = _depositFee;
         withdrawFee = _withdrawFee;
@@ -92,8 +99,10 @@ contract SatoshiOpstion is ERC721, Ownable {
         eta2 = _eta2;
         _p = __p;
         _q = __q;
+        phi = _phi;
         _pcpct = __pcpct;
-        _V = __V;
+        r = _r;
+        // _V = __V;
     }
 
     /**
@@ -319,9 +328,6 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 delta;
         int128 t;
         int128 BK;
-        // int128 l1Orl3;
-        // int128 l2Orl4;
-        // int128 omg;
     }
 
     // 获取PBCT
@@ -449,11 +455,9 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     struct GetPriceimpactInfo {
-        int128 lpha;
-        int128 delt;
         int128 rl;
-        int128 Q;
         int128 pbct;
+        int128 Q;
     }
 
     // 获取Priceimpact
@@ -462,28 +466,18 @@ contract SatoshiOpstion is ERC721, Ownable {
         view
         returns (int128)
     {
-        // int128 a1 = ABDKMath64x64.log_2(ABDKMath64x64.div(_pcpct, _V));
-        // int128 a2 = ABDKMath64x64.log_2(
-        //     ABDKMath64x64.mul(rl, ABDKMath64x64.mul(Q, pbct))
-        // );
-        int128 _priceimpact = ABDKMath64x64.mul(
-            _GetPriceimpactInfo.lpha,
+        int128 a1 = phi;
+        int128 a2 = ABDKMath64x64.log_2(
             ABDKMath64x64.mul(
-                _GetPriceimpactInfo.delt,
+                _GetPriceimpactInfo.rl,
                 ABDKMath64x64.mul(
-                    ABDKMath64x64.log_2(ABDKMath64x64.div(_pcpct, _V)),
-                    ABDKMath64x64.log_2(
-                        ABDKMath64x64.mul(
-                            _GetPriceimpactInfo.rl,
-                            ABDKMath64x64.mul(
-                                _GetPriceimpactInfo.Q,
-                                _GetPriceimpactInfo.pbct
-                            )
-                        )
-                    )
+                    _GetPriceimpactInfo.Q,
+                    _GetPriceimpactInfo.pbct
                 )
             )
         );
+
+        int128 _priceimpact = ABDKMath64x64.mul(a1, a2);
         return _priceimpact;
     }
 
@@ -499,7 +493,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         getLiquidationNumInfo memory _getLiquidationNumInfo
     ) public view returns (int128) {
         int128 _a = ABDKMath64x64.mul(
-            ABDKMath64x64.sub(1, withdrawFee),
+            ABDKMath64x64.sub(1 * 2**64, withdrawFee),
             ABDKMath64x64.mul(
                 _getLiquidationNumInfo.pbct,
                 _getLiquidationNumInfo.Q
@@ -509,15 +503,13 @@ contract SatoshiOpstion is ERC721, Ownable {
             _getLiquidationNumInfo.rl,
             _getLiquidationNumInfo.priceimpact
         );
-        // uint256 _b_1_uint256 = ABDKMath64x64.mulu(_b_1, 1);
-        // uint256 _b_2_uint256 = ABDKMath64x64.mulu(1, 1); //toDo 0.1数值转换
 
         uint256 _b_3_uint256 = Math.min(
             ABDKMath64x64.mulu(_b_1, 1),
-            ABDKMath64x64.mulu(1 * 2**64, 1) //toDo 0.1数值转换
+            ABDKMath64x64.mulu(r, 1) // 0.03数值转换
         );
         int128 _b_3_uint256_int128 = ABDKMath64x64.fromUInt(_b_3_uint256);
-        int128 _b = ABDKMath64x64.add(1, _b_3_uint256_int128);
+        int128 _b = ABDKMath64x64.add(1 * 2**64, _b_3_uint256_int128);
         int128 _liquidationNum = ABDKMath64x64.div(_a, _b);
         return _liquidationNum;
     }
