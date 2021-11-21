@@ -5,7 +5,7 @@ const BigNumber = require('bignumber.js');
 function getInt128(num) {
   let _num = (new BigNumber(num).multipliedBy(new BigNumber(2).pow(64))).toString(10);
   _num = _num.split('.')[0];
-  console.log("_num", _num);
+  // console.log("_num", _num);
   return _num
 }
 const currBtc = 65000;
@@ -135,5 +135,25 @@ describe("Greeter", function () {
       getInt128(10591111237041),// priceimpact;
     ])
     console.log("LiquidationNum--", LiquidationNum.toString())
+
+    // 开仓
+    let open = await greeter.open(
+      true,// direction;
+      getInt128(ltable[0]["delta"]),// delta;
+      getInt128(2),// bk;
+      getInt128(500),// cppcNum;
+    )
+    open.wait();
+    console.log("open--", open)
+
+    // 获取持仓
+    let NftDatas = await greeter.getNFT()
+    const pid = NftDatas[0].pid.toString()
+    const cppcNum = NftDatas[0].cppcNum.toString()
+    const createTime = NftDatas[0].createTime.toString()
+    console.log("NftDatas--", NftDatas, pid, cppcNum, createTime)
+
   });
+
+
 });

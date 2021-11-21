@@ -12,7 +12,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     address public cppc;
 
     // 仓位id
-    uint256 private _totalSupply;
+    uint256 private _totalSupply = 0;
 
     int128 currBtc; //当前BTC价格
     // 开仓费率
@@ -49,7 +49,6 @@ contract SatoshiOpstion is ERC721, Ownable {
     struct NftData {
         int128 delta;
         uint256 pid;
-        int128 lever;
         int128 cppcNum;
         uint256 createTime;
         int128 openPrice;
@@ -85,11 +84,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 _phi,
         int128 __pcpct,
         int128 _r
-    )
-        public
-        // int128 __V
-        onlyOwner
-    {
+    ) public onlyOwner {
         currBtc = _currBtc;
         depositFee = _depositFee;
         withdrawFee = _withdrawFee;
@@ -162,20 +157,44 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     // 开仓
-    function open(NftData memory _nftData) public returns (uint256 pid) {
+    function open(
+        bool direction,
+        int128 delta,
+        int128 bk,
+        int128 cppcNum
+    ) public returns (uint256 pid) {
+        int128 _omg;
+        int128 _pbc;
+        if (direction) {
+            _omg = getUpOmg(delta);
+        } else {
+            _omg = getDownOmg(delta);
+        }
+        getPurchaseQuantityInfo
+            memory _getPurchaseQuantityInfo = getPurchaseQuantityInfo(
+                direction,
+                bk,
+                delta,
+                cppcNum
+            );
+        _pbc = getPurchaseQuantity(_getPurchaseQuantityInfo);
+        console.log("_pbc");
+        console.logInt(_pbc);
+
         pid = _mintNft(_msgSender());
+
+        console.log("_pid");
+        console.logUint(pid);
         NftData storage nftData = nftStore[pid];
         // nftData._address = _nftData._address;
-        nftData.delta = _nftData.delta;
+        nftData.delta = delta;
         nftData.pid = pid;
-        nftData.lever = _nftData.lever;
-        nftData.cppcNum = _nftData.cppcNum;
-        nftData.createTime = _nftData.createTime;
-        nftData.openPrice = _nftData.openPrice;
-        nftData.direction = _nftData.direction;
+        nftData.direction = direction;
+        nftData.cppcNum = cppcNum;
+        nftData.createTime = block.timestamp;
+        nftData.openPrice = currBtc;
         nftData.isEnable = true;
 
-        // getPurchaseQuantity
         return pid;
     }
 
@@ -517,7 +536,11 @@ contract SatoshiOpstion is ERC721, Ownable {
 
     function _mintNft(address _to) internal returns (uint256) {
         _mint(_to, _totalSupply);
-        return _totalSupply += 1;
+        // console.log("_totalSupply");
+        // _totalSupply = _totalSupply + 1;
+        // console.logUint(_totalSupply);
+        return _totalSupply++;
+        // return _totalSupply;
     }
 
     // 记录 id
