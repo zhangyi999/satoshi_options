@@ -22,14 +22,14 @@ const phi = 0.00000015;
 const pcpct = 0.01;
 const ltable = [
   {
-    delta: "2.000000001",
+    delta: "2",
     l1: "2.365409217",
     l2: "24.2290085",
     l3: "1.424722727",
     l4: "25.841622"
   },
   {
-    delta: "6.000000009",
+    delta: "6",
     l1: "3.65446369",
     l2: "24.266891",
     l3: "4.032382035",
@@ -79,29 +79,29 @@ describe("Greeter", function () {
     // );
     // console.log("DeltaTable--", DeltaTable);
 
-    let upOmg = await greeter.getUpOmg(
-      getInt128(ltable[0]["delta"])
-    );
-    console.log("upOmg--", upOmg.toString());
+    // let upOmg = await greeter.getUpOmg(
+    //   getInt128(ltable[0]["delta"])
+    // );
+    // console.log("upOmg--", upOmg.toString());
 
-    let downOmg = await greeter.getDownOmg(
-      getInt128(ltable[0]["delta"])
-    );
-    console.log("downOmg--", downOmg.toString())
+    // let downOmg = await greeter.getDownOmg(
+    //   getInt128(ltable[0]["delta"])
+    // );
+    // console.log("downOmg--", downOmg.toString())
 
-    let purchaseQuantity = await greeter.getPurchaseQuantity([
-      true,// direction;
-      getInt128(2),// bk;
-      getInt128(ltable[0]["delta"]),// delta;
-      getInt128(2)// _i;
-    ])
-    console.log("purchaseQuantity--", purchaseQuantity.toString())
+    // let purchaseQuantity = await greeter.getPurchaseQuantity([
+    //   true,// direction;
+    //   getInt128(2),// bk;
+    //   getInt128(ltable[0]["delta"]),// delta;
+    //   getInt128(2)// _i;
+    // ])
+    // console.log("purchaseQuantity--", purchaseQuantity.toString())
 
-    let TB = await greeter.getTB(
-      true,// direction;
-      getInt128(60000)// K;
-    )
-    console.log("TB--", TB.toString())
+    // let TB = await greeter.getTB(
+    //   true,// direction;
+    //   getInt128(60000)// K;
+    // )
+    // console.log("TB--", TB.toString())
 
     // let PBCT = await greeter.getPBCT([
     //   true,// direction;
@@ -112,32 +112,35 @@ describe("Greeter", function () {
     // )
     // console.log("PBCT--", PBCT.toString())
 
-    let RL = await greeter.getRL(true, [
-      true,// direction;
-      getInt128(ltable[0]["delta"]),// delta,
-      getInt128(2),// BK;
-      getInt128(60000), // K
-    ]
-    )
-    console.log("RL--", RL.toString())
+    // let RL = await greeter.getRL([
+    //   true,// direction;
+    //   getInt128(ltable[0]["delta"]),// delta,
+    //   getInt128(2),// BK;
+    //   getInt128(60000), // K
+    // ]
+    // )
+    // console.log("RL--", RL.toString())
 
-    let Priceimpact = await greeter.getPriceimpact([
-      "49149741625773706179",// rl;
-      "49149741625773706179",// pbct;
-      getInt128(2),// Q;
-    ]
-    )
-    console.log("Priceimpact--", Priceimpact.toString())
+    // let Priceimpact = await greeter.getPriceimpact([
+    //   "49149741625773706179",// rl;
+    //   "49149741625773706179",// pbct;
+    //   getInt128(2),// Q;
+    // ]
+    // )
+    // console.log("Priceimpact--", Priceimpact.toString())
 
-    let LiquidationNum = await greeter.getLiquidationNum([
-      "49149741625773706179",// pbct;
-      getInt128(2),// Q;
-      "49149741625773706179",// rl;
-      getInt128(10591111237041),// priceimpact;
-    ])
-    console.log("LiquidationNum--", LiquidationNum.toString())
+    // let LiquidationNum = await greeter.getLiquidationNum([
+    //   "49149741625773706179",// pbct;
+    //   getInt128(2),// Q;
+    //   "49149741625773706179",// rl;
+    //   getInt128(10591111237041),// priceimpact;
+    // ])
+    // console.log("LiquidationNum--", LiquidationNum.toString())
 
     // 开仓
+    
+    let _delta = getInt128(ltable[0]["delta"]);
+    console.log("开仓Delta",_delta);
     let open = await greeter.open(
       true,// direction;
       getInt128(ltable[0]["delta"]),// delta;
@@ -153,6 +156,15 @@ describe("Greeter", function () {
     const cppcNum = NftDatas[0].cppcNum.toString()
     const createTime = NftDatas[0].createTime.toString()
     console.log("NftDatas--", NftDatas, pid, cppcNum, createTime)
+
+    // 平仓
+
+    let withdraw = await greeter.Withdraw(
+      pid,// direction;
+      getInt128(86000),//btcPrice
+    )
+    // withdraw.wait();
+    console.log("withdraw--", withdraw)
 
   });
 

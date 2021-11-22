@@ -188,6 +188,9 @@ contract SatoshiOpstion is ERC721, Ownable {
         } else {
             _omg = getDownOmg(delta);
         }
+        uint64 _omgUInt = ABDKMath64x64.toUInt(_omg);
+        console.log("_omgUInt");
+        console.logUint(_omgUInt);
         int128 K = getBk(bk);
         getPurchaseQuantityInfo
             memory _getPurchaseQuantityInfo = getPurchaseQuantityInfo(
@@ -197,20 +200,20 @@ contract SatoshiOpstion is ERC721, Ownable {
                 cppcNum
             );
         _pbc = getPurchaseQuantity(_getPurchaseQuantityInfo);
-        console.log("_pbc");
-        console.logInt(_pbc);
+        // console.log("_pbc");
+        // console.logInt(_pbc);
 
         pid = _mintNft(_msgSender());
 
-        console.log("_pid");
-        console.logUint(pid);
+        // console.log("_pid");
+        // console.logUint(pid);
         NftData storage nftData = nftStore[pid];
         // nftData._address = _nftData._address;
         nftData.delta = delta;
         nftData.pid = pid;
         nftData.direction = direction;
         nftData.cppcNum = cppcNum;
-        nftData.createTime = block.timestamp;
+        nftData.createTime = (block.timestamp / 1000);
         nftData.openPrice = currBtc;
         nftData.bk = bk;
         nftData.K = K;
@@ -326,10 +329,17 @@ contract SatoshiOpstion is ERC721, Ownable {
         nftData.isEnable = false;
         bool direction = nftData.direction;
         int128 delta = nftData.delta;
+        int128 currTime = 60 * 60; // ABDKMath64x64.fromUInt(block.timestamp / 1000);
         int128 createTime = ABDKMath64x64.fromUInt(nftData.createTime);
+        int128 t = ABDKMath64x64.sub(currTime, createTime);
         int128 bk = nftData.bk;
         int128 cppcNum = nftData.cppcNum;
         int128 K = nftData.K;
+        // console.logInt(delta);
+        // console.logInt(t);
+        // console.logInt(bk);
+        // console.logInt(cppcNum);
+        // console.logInt(K);
         getPBCTInfo memory _getPBCTInfo = getPBCTInfo(
             direction,
             bk,
@@ -338,6 +348,29 @@ contract SatoshiOpstion is ERC721, Ownable {
             K
         );
         int128 pbct = getPBCT(_getPBCTInfo);
+        console.log("getPBCT--");
+        console.logInt(pbct);
+        GetRlInfo memory _GetRlInfo = GetRlInfo(direction, bk, delta, K);
+        int128 rl = getRL(_GetRlInfo);
+        console.log("getRL--");
+        console.logInt(rl);
+
+        // GetPriceimpactInfo memory _GetPriceimpactInfo = GetPriceimpactInfo(
+        //     rl,
+        //     pbct,
+        //     cppcNum
+        // );
+        // int128 priceimpact = getPriceimpact(_GetPriceimpactInfo);
+
+        // getLiquidationNumInfo memory _getLiquidationNumInfo = getLiquidationNumInfo(
+        //     pbct,
+        //     cppcNum,
+        //     rl,
+        //     priceimpact
+        // );
+        // int128 LiquidationNum = getLiquidationNum(_getLiquidationNumInfo);
+
+        // return LiquidationNum;
     }
 
     function downLiquidation() private view returns (int128) {}
@@ -377,6 +410,9 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 l1Orl3;
         int128 l2Orl4;
         int128 omg;
+        // console.log("getPBCT--");
+        // console.logInt(_getPBCTInfo.delta);
+        // console.logBool(_getPBCTInfo.direction);
         DeltaItem memory _DeltaItem = getDeltaTable(_getPBCTInfo.delta);
         if (_getPBCTInfo.direction) {
             l1Orl3 = _DeltaItem.L1;
@@ -388,6 +424,12 @@ contract SatoshiOpstion is ERC721, Ownable {
             omg = getDownOmg(_getPBCTInfo.delta);
         }
 
+        console.log("getPBCT_l1Orl3");
+        console.logInt(l1Orl3);
+        console.log("getPBCT_l2Orl4");
+        console.logInt(l2Orl4);
+        // console.log("omg");
+        // console.logInt(omg);
         // uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
         // uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
         // int128 K = getBk(_getPBCTInfo.BK);
@@ -410,20 +452,22 @@ contract SatoshiOpstion is ERC721, Ownable {
             );
         }
 
-        // int128 _a = ABDKMath64x64.add(_a1_w_l1, _a2_w_l2);
-        // int128 _b = ABDKMath64x64.exp_2(
-        //     ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t)
-        // );
+        int128 _a = ABDKMath64x64.add(_a1_w_l1, _a2_w_l2);
+        console.log("getPBCT_a");
+        console.logInt(_a);
+
         int128 _deltaT = ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t);
-        console.log("_deltaT");
+        console.log("getPBCT_deltaT");
         console.logInt(_deltaT);
-        int128 _expNum = ABDKMath64x64.exp_2(_deltaT);
-        console.log("_expNum");
-        console.logInt(_expNum);
-        int128 _pbct = ABDKMath64x64.div(
-            ABDKMath64x64.add(_a1_w_l1, _a2_w_l2),
-            ABDKMath64x64.exp_2(_deltaT)
-        );
+        int128 _b = ABDKMath64x64.exp_2(_deltaT);
+        console.log("getPBCT_b");
+        console.logInt(_b);
+        // int128 _expNum = ABDKMath64x64.exp_2(_deltaT);
+        // console.log("getPBCT_expNum");
+        // console.logInt(_expNum);
+        int128 _pbct = ABDKMath64x64.div(_a, _b);
+        console.log("getPBCT_pbct");
+        console.logInt(_pbct);
         return _pbct;
     }
 
@@ -435,11 +479,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     // 获取RL
-    function getRL(bool direction, GetRlInfo memory _getRlInfo)
-        public
-        view
-        returns (int128)
-    {
+    function getRL(GetRlInfo memory _getRlInfo) public view returns (int128) {
         int128 l1Orl3;
         int128 l2Orl4;
         int128 omg;
@@ -477,7 +517,7 @@ contract SatoshiOpstion is ERC721, Ownable {
             ABDKMath64x64.sub(1 * 2**64, omg),
             _a2_l2
         );
-        if (!direction) {
+        if (!_getRlInfo.direction) {
             _a1 = ABDKMath64x64.div(ABDKMath64x64.mul(l1Orl3, omg), _a1_l1);
             _a2 = ABDKMath64x64.div(
                 ABDKMath64x64.mul(l2Orl4, ABDKMath64x64.sub(1 * 2**64, omg)),
