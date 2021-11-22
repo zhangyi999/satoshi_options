@@ -72,6 +72,7 @@ describe("Greeter", function () {
         getInt128(item.l4),
       ]
     })
+    console.log(LTable)
     let tx = await greeter.SetLTable(LTable);
 
     // let DeltaTable = await greeter.getDeltaTable(

@@ -355,20 +355,25 @@ contract SatoshiOpstion is ERC721, Ownable {
         console.log("getRL--");
         console.logInt(rl);
 
-        // GetPriceimpactInfo memory _GetPriceimpactInfo = GetPriceimpactInfo(
-        //     rl,
-        //     pbct,
-        //     cppcNum
-        // );
-        // int128 priceimpact = getPriceimpact(_GetPriceimpactInfo);
+        GetPriceimpactInfo memory _GetPriceimpactInfo = GetPriceimpactInfo(
+            rl,
+            pbct,
+            cppcNum
+        );
+        int128 priceimpact = getPriceimpact(_GetPriceimpactInfo);
+        console.log("priceimpact--");
+        console.logInt(priceimpact);
 
-        // getLiquidationNumInfo memory _getLiquidationNumInfo = getLiquidationNumInfo(
-        //     pbct,
-        //     cppcNum,
-        //     rl,
-        //     priceimpact
-        // );
-        // int128 LiquidationNum = getLiquidationNum(_getLiquidationNumInfo);
+        getLiquidationNumInfo
+            memory _getLiquidationNumInfo = getLiquidationNumInfo(
+                pbct,
+                cppcNum,
+                rl,
+                priceimpact
+            );
+        int128 LiquidationNum = getLiquidationNum(_getLiquidationNumInfo);
+        console.log("LiquidationNum--");
+        console.logInt(LiquidationNum);
 
         // return LiquidationNum;
     }
@@ -435,14 +440,17 @@ contract SatoshiOpstion is ERC721, Ownable {
         // int128 K = getBk(_getPBCTInfo.BK);
         // int128 _tb = getTB(true, _getPBCTInfo.BK);
         int128 _a1 = ABDKMath64x64.div(
-            getTB(true, _getPBCTInfo.K),
+            getTB(_getPBCTInfo.direction, _getPBCTInfo.K),
             _getPBCTInfo.K
         );
         int128 _a1_l1 = ABDKMath64x64.pow(_a1, ABDKMath64x64.mulu(l1Orl3, 1));
         int128 _a1_w_l1 = ABDKMath64x64.mul(omg, _a1_l1);
 
         int128 _a2_l2 = ABDKMath64x64.pow(_a1, ABDKMath64x64.mulu(l2Orl4, 1));
-        int128 _a2_w_l2 = ABDKMath64x64.mul(ABDKMath64x64.sub(1, omg), _a2_l2);
+        int128 _a2_w_l2 = ABDKMath64x64.mul(
+            ABDKMath64x64.sub(1 * 2**64, omg),
+            _a2_l2
+        );
 
         if (!_getPBCTInfo.direction) {
             _a1_w_l1 = ABDKMath64x64.div(omg, _a1_l1);
