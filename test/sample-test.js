@@ -221,7 +221,7 @@ describe("Greeter", function () {
 
 
     // // testPrice
-    const tradeToken = "0x4e88216b4174a3da5cdac7d83a9d21f08a8b2109";
+    const tradeToken = "0x279F9ABfa3495ac679BAe22590d96777eF65D434";
     let signedPr = await getPriceData(tradeToken, ethers.utils.parseUnits('40000', 18));
     console.log("signedPr", signedPr);
     let checkIdentity = await greeter._checkIdentityAndUpdateOracle(
