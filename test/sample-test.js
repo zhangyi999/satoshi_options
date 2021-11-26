@@ -11,8 +11,8 @@ const Web3 = require('web3');
 
 const web3 = new Web3();
 const abi = require('ethereumjs-abi');
-const walletPrivateKey = Wallet.fromMnemonic("test test test test test test test test test test test junk")
-const PRIVATE_KEY = walletPrivateKey.privateKey;
+// const walletPrivateKey = Wallet.fromMnemonic("0cc2cc4394407fbf1463d0f6099b97215f5f1e31b8d8784b8cb7c3b3252f7fbb")
+const PRIVATE_KEY = "0cc2cc4394407fbf1463d0f6099b97215f5f1e31b8d8784b8cb7c3b3252f7fbb";  //2109
 
 
 function getInt128(num) {
@@ -52,11 +52,12 @@ const ltable = [
 // CBBCRouter
 let accounts, deployer, user, factory, tToken0;
 let nonce = new BigNumber(0);
-const cppcAddress = "0x4E88216b4174A3da5CDaC7D83A9D21F08A8b2109";
+const cppcAddress = "0x279f9abfa3495ac679bae22590d96777ef65d434";
 async function setupContracts() {
   accounts = await ethers.getSigners()
   deployer = accounts[0]
   user = accounts[1]
+
   const erc20Token = await ethers.getContractFactory("ERC20", deployer);
   // tToken0 = await erc20Token.deploy(TOTAL_SUPPLY);
   // factory = await (await ethers.getContractFactory("CbbcFactory", deployer)).deploy();
@@ -217,7 +218,7 @@ describe("Greeter", function () {
 
 
     // // testPrice
-    const tradeToken = "0x279F9ABfa3495ac679BAe22590d96777eF65D434";
+    const tradeToken = "0x4e88216b4174a3da5cdac7d83a9d21f08a8b2109";
     let signedPr = await getPriceData(tradeToken, ethers.utils.parseUnits('40000', 18));
     console.log("signedPr", signedPr);
     let checkIdentity = await greeter._checkIdentityAndUpdateOracle(

@@ -34,7 +34,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     int128 r; //SettlementBTCPrice 参数 0.03
     // int128 _V; //10000000000*2**64 btc全球总交易量
 
-    address cppcAddress = 0x4E88216b4174A3da5CDaC7D83A9D21F08A8b2109;
+    address DATA_PROVIDER = 0x279F9ABfa3495ac679BAe22590d96777eF65D434;
 
     struct DeltaItem {
         int128 delta; //2**64  int128
@@ -242,7 +242,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         uint256 nonce = signedPr.nonce;
         bytes calldata signature = signedPr.signature;
         bytes32 hash = keccak256(
-            abi.encodePacked(tradeToken, tradePrice, nonce, cppcAddress)
+            abi.encodePacked(tradeToken, tradePrice, nonce, DATA_PROVIDER)
         );
         bytes32 messageHash = hash.toEthSignedMessageHash();
 
@@ -251,8 +251,8 @@ contract SatoshiOpstion is ERC721, Ownable {
         console.log("signer");
         console.logAddress(signer);
         console.logAddress(tradeToken);
-        console.logAddress(cppcAddress);
-        require(signer == cppcAddress, "CBBC: INVALID_SIGNER.");
+        console.logAddress(DATA_PROVIDER);
+        require(signer == DATA_PROVIDER, "CBBC: INVALID_SIGNER.");
 
         // require(!seenNonces[signer][nonce], "CBBC: USED_NONCE");
         // seenNonces[signer][nonce] = true;
