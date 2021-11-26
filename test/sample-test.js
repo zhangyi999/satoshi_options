@@ -1,7 +1,20 @@
 const { expect } = require("chai");
+const { constants, Contract, Wallet } = require('ethers');
 const { ethers } = require("hardhat");
 
 const BigNumber = require('bignumber.js');
+const Web3 = require('web3');
+
+
+
+
+
+const web3 = new Web3();
+const abi = require('ethereumjs-abi');
+const walletPrivateKey = Wallet.fromMnemonic("test test test test test test test test test test test junk")
+const PRIVATE_KEY = walletPrivateKey.privateKey;
+
+
 function getInt128(num) {
   let _num = (new BigNumber(num).multipliedBy(new BigNumber(2).pow(64))).toString(10);
   _num = _num.split('.')[0];
@@ -36,8 +49,40 @@ const ltable = [
     l4: "25.90249482"
   }
 ]
+// CBBCRouter
+let accounts, deployer, user, factory, tToken0;
+let nonce = new BigNumber(0);
+const cppcAddress = "0x4E88216b4174A3da5CDaC7D83A9D21F08A8b2109";
+async function setupContracts() {
+  accounts = await ethers.getSigners()
+  deployer = accounts[0]
+  user = accounts[1]
+  const erc20Token = await ethers.getContractFactory("ERC20", deployer);
+  // tToken0 = await erc20Token.deploy(TOTAL_SUPPLY);
+  // factory = await (await ethers.getContractFactory("CbbcFactory", deployer)).deploy();
+}
+
+
+async function getPriceData(tokenAddress, tradePrice) {
+  const nonce_ = nonce;
+  nonce = nonce.plus(1);
+
+  const parameterTypes = ["address", "uint256", "uint256", "address"];
+  const parameterValues = [tokenAddress, tradePrice.toString(), nonce_.toString(), cppcAddress];
+  const hash = "0x" + abi.soliditySHA3(parameterTypes, parameterValues).toString("hex");
+  const signature_ = web3.eth.accounts.sign(hash, PRIVATE_KEY);
+
+  return {
+    tradePrice: tradePrice.toString(),
+    nonce: nonce_.toString(),
+    signature: signature_.signature
+  };
+}
+
 
 describe("Greeter", function () {
+  beforeEach("set up the contracts", setupContracts);
+
 
   it("Should return the new greeting once it's changed", async function () {
     accounts = await ethers.getSigners();
@@ -139,9 +184,9 @@ describe("Greeter", function () {
     // console.log("LiquidationNum--", LiquidationNum.toString())
 
     // 开仓
-    
+
     let _delta = getInt128(ltable[0]["delta"]);
-    console.log("开仓Delta",_delta);
+    console.log("开仓Delta", _delta);
     let open = await greeter.open(
       true,// direction;
       getInt128(ltable[0]["delta"]),// delta;
@@ -166,6 +211,21 @@ describe("Greeter", function () {
     )
     // withdraw.wait();
     console.log("withdraw--", withdraw)
+
+
+
+
+
+    // // testPrice
+    const tradeToken = "0x279F9ABfa3495ac679BAe22590d96777eF65D434";
+    let signedPr = await getPriceData(tradeToken, ethers.utils.parseUnits('40000', 18));
+    console.log("signedPr", signedPr);
+    let checkIdentity = await greeter._checkIdentityAndUpdateOracle(
+      tradeToken,
+      signedPr,
+    )
+    // withdraw.wait();
+    console.log("checkIdentity--", checkIdentity)
 
   });
 

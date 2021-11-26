@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
+import "./libraries/ECDSA.sol";
 import "hardhat/console.sol";
 
 contract SatoshiOpstion is ERC721, Ownable {
@@ -32,6 +33,8 @@ contract SatoshiOpstion is ERC721, Ownable {
     int128 _pcpct; // pccp价格
     int128 r; //SettlementBTCPrice 参数 0.03
     // int128 _V; //10000000000*2**64 btc全球总交易量
+
+    address cppcAddress = 0x4E88216b4174A3da5CDaC7D83A9D21F08A8b2109;
 
     struct DeltaItem {
         int128 delta; //2**64  int128
@@ -220,6 +223,45 @@ contract SatoshiOpstion is ERC721, Ownable {
         nftData.isEnable = true;
 
         return pid;
+    }
+
+    using ECDSA for bytes32;
+    struct signedPrice {
+        uint256 tradePrice;
+        uint256 nonce;
+        bytes signature;
+    }
+
+    //得到价格
+    function _checkIdentityAndUpdateOracle(
+        address tradeToken,
+        signedPrice calldata signedPr
+    ) public returns (bool success) {
+        // This recreates the message hash that was signed on the client.
+        uint256 tradePrice = signedPr.tradePrice;
+        uint256 nonce = signedPr.nonce;
+        bytes calldata signature = signedPr.signature;
+        bytes32 hash = keccak256(
+            abi.encodePacked(tradeToken, tradePrice, nonce, cppcAddress)
+        );
+        bytes32 messageHash = hash.toEthSignedMessageHash();
+
+        // Verify that the message's signer is the data provider
+        address signer = messageHash.recover(signature);
+        console.log("signer");
+        console.logAddress(signer);
+        console.logAddress(tradeToken);
+        console.logAddress(cppcAddress);
+        require(signer == cppcAddress, "CBBC: INVALID_SIGNER.");
+
+        // require(!seenNonces[signer][nonce], "CBBC: USED_NONCE");
+        // seenNonces[signer][nonce] = true;
+
+        // update the oracle
+        // address tradePriceOracle = marketOracle.priceMedianOracles(tradeToken);
+        // IMedianOracle(tradePriceOracle).pushReport(tradePrice);
+        console.log("ok");
+        success = true;
     }
 
     // 通过Delta获取配置
