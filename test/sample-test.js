@@ -12,7 +12,7 @@ const Web3 = require('web3');
 const web3 = new Web3();
 const abi = require('ethereumjs-abi');
 // const walletPrivateKey = Wallet.fromMnemonic("0cc2cc4394407fbf1463d0f6099b97215f5f1e31b8d8784b8cb7c3b3252f7fbb")
-const PRIVATE_KEY = "0cc2cc4394407fbf1463d0f6099b97215f5f1e31b8d8784b8cb7c3b3252f7fbb";  //2109
+const PRIVATE_KEY = "0x1b502936fcfa1381d1bc454dac74f1a2d2c7e4ed7634fe1acc57b0fa32c5f26e";  //2109
 
 console.log(
   web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY)
@@ -55,7 +55,7 @@ const ltable = [
 // CBBCRouter
 let accounts, deployer, user, factory, tToken0;
 let nonce = new BigNumber(0);
-const cppcAddress = "0x4E88216b4174A3da5CDaC7D83A9D21F08A8b2109"; //2109
+const cppcAddress = "0x9548B3682cD65D3265C92d5111a9782c86Ca886d"; //2109
 async function setupContracts() {
   accounts = await ethers.getSigners()
   deployer = accounts[0]

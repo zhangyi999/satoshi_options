@@ -34,7 +34,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     int128 r; //SettlementBTCPrice 参数 0.03
     // int128 _V; //10000000000*2**64 btc全球总交易量
 
-    address DATA_PROVIDER = 0x4E88216b4174A3da5CDaC7D83A9D21F08A8b2109;
+    address DATA_PROVIDER = 0x9548B3682cD65D3265C92d5111a9782c86Ca886d;
 
     struct DeltaItem {
         int128 delta; //2**64  int128
