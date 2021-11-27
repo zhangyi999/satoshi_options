@@ -71,7 +71,7 @@ async function getPriceData(tokenAddress, tradePrice) {
   const nonce_ = nonce;
   nonce = nonce.plus(1);
 
-  const parameterTypes = ["address", "uint256", "uint256", "address"];
+  const parameterTypes = ["address", "int128", "uint256", "address"];
   const parameterValues = [tokenAddress, tradePrice.toString(), nonce_.toString(), cppcAddress];
   const hash = "0x" + abi.soliditySHA3(parameterTypes, parameterValues).toString("hex");
   const signature_ = web3.eth.accounts.sign(hash, PRIVATE_KEY);
@@ -190,7 +190,7 @@ describe("Greeter", function () {
 
     // 设置BTC价格
     const tradeToken = "0x279F9ABfa3495ac679BAe22590d96777eF65D434";
-    let signedPr = await getPriceData(tradeToken, ethers.utils.parseUnits('40000', 18));
+    let signedPr = await getPriceData(tradeToken, getInt128(65000));
     console.log("signedPr", signedPr);
     // let checkIdentity = await greeter._checkIdentity(
     //   tradeToken,

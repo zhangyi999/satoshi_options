@@ -11,7 +11,9 @@ import "hardhat/console.sol";
 
 interface ERC20Interface {
     function balanceOf(address user) external view returns (uint256);
+
     function mint(address to, uint256 amount) external;
+
     function burn(uint256 amount) external;
 }
 
@@ -20,36 +22,67 @@ library SafeToken {
         return ERC20Interface(token).balanceOf(address(this));
     }
 
-    function balanceOf(address token, address user) internal view returns (uint256) {
+    function balanceOf(address token, address user)
+        internal
+        view
+        returns (uint256)
+    {
         return ERC20Interface(token).balanceOf(user);
     }
 
-    function safeApprove(address token, address to, uint256 value) internal {
+    function safeApprove(
+        address token,
+        address to,
+        uint256 value
+    ) internal {
         // bytes4(keccak256(bytes('approve(address,uint256)')));
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "!safeApprove");
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(0x095ea7b3, to, value)
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "!safeApprove"
+        );
     }
 
-    function safeTransfer(address token, address to, uint256 value) internal {
+    function safeTransfer(
+        address token,
+        address to,
+        uint256 value
+    ) internal {
         // bytes4(keccak256(bytes('transfer(address,uint256)')));
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0xa9059cbb, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "!safeTransfer");
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(0xa9059cbb, to, value)
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "!safeTransfer"
+        );
     }
 
-    function safeTransferFrom(address token, address from, address to, uint256 value) internal {
+    function safeTransferFrom(
+        address token,
+        address from,
+        address to,
+        uint256 value
+    ) internal {
         // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
-        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "!safeTransferFrom");
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(0x23b872dd, from, to, value)
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "!safeTransferFrom"
+        );
     }
 
     function safeTransferETH(address to, uint256 value) internal {
-        (bool success, ) = to.call{value:value}(new bytes(0));
+        (bool success, ) = to.call{value: value}(new bytes(0));
         require(success, "!safeTransferETH");
     }
 }
 
 contract SatoshiOpstion is ERC721, Ownable {
-
     using SafeToken for address;
 
     // 筹码
@@ -228,7 +261,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     struct signedPrice {
-        uint256 tradePrice;
+        int128 tradePrice;
         uint256 nonce;
         bytes signature;
     }
@@ -249,53 +282,47 @@ contract SatoshiOpstion is ERC721, Ownable {
         console.log("isIdentity");
         console.logBool(isIdentity);
         require(isIdentity, "Price Error.");
-        uint256 _currBtc = signedPr.tradePrice;
-        console.log("_currBtc");
-        console.logUint(_currBtc);
-        int128 _currBtc1 = ABDKMath64x64.fromUInt(_currBtc);
-        // console.logInt(_currBtc1);
+        int128 _currBtc = signedPr.tradePrice;
+        SetCurrBtcPrice(_currBtc);
 
-        // SetCurrBtcPrice(ABDKMath64x64.fromUInt(_currBtc1));
-        return 0;
+        if (direction) {
+            _omg = getUpOmg(delta);
+        } else {
+            _omg = getDownOmg(delta);
+        }
 
-        // if (direction) {
-        //     _omg = getUpOmg(delta);
-        // } else {
-        //     _omg = getDownOmg(delta);
-        // }
+        uint64 _omgUInt = ABDKMath64x64.toUInt(_omg);
+        console.log("_omgUInt");
+        console.logUint(_omgUInt);
+        int128 K = getBk(bk);
+        getPurchaseQuantityInfo
+            memory _getPurchaseQuantityInfo = getPurchaseQuantityInfo(
+                direction,
+                bk,
+                delta,
+                cppcNum
+            );
+        _pbc = getPurchaseQuantity(_getPurchaseQuantityInfo);
+        // console.log("_pbc");
+        // console.logInt(_pbc);
 
-        // uint64 _omgUInt = ABDKMath64x64.toUInt(_omg);
-        // console.log("_omgUInt");
-        // console.logUint(_omgUInt);
-        // int128 K = getBk(bk);
-        // getPurchaseQuantityInfo
-        //     memory _getPurchaseQuantityInfo = getPurchaseQuantityInfo(
-        //         direction,
-        //         bk,
-        //         delta,
-        //         cppcNum
-        //     );
-        // _pbc = getPurchaseQuantity(_getPurchaseQuantityInfo);
-        // // console.log("_pbc");
-        // // console.logInt(_pbc);
+        pid = _mintNft(_msgSender());
 
-        // pid = _mintNft(_msgSender());
-
-        // // console.log("_pid");
-        // // console.logUint(pid);
-        // NftData storage nftData = nftStore[pid];
-        // // nftData._address = _nftData._address;
-        // nftData.delta = delta;
-        // nftData.pid = pid;
-        // nftData.direction = direction;
-        // nftData.cppcNum = cppcNum;
-        // nftData.createTime = (block.timestamp / 1000);
-        // nftData.openPrice = currBtc;
-        // nftData.bk = bk;
-        // nftData.K = K;
-        // nftData.isEnable = true;
-
-        // return pid;
+        // console.log("_pid");
+        // console.logUint(pid);
+        NftData storage nftData = nftStore[pid];
+        // nftData._address = _nftData._address;
+        nftData.delta = delta;
+        nftData.pid = pid;
+        nftData.direction = direction;
+        nftData.cppcNum = cppcNum;
+        nftData.createTime = (block.timestamp / 1000);
+        nftData.openPrice = currBtc;
+        nftData.bk = bk;
+        nftData.K = K;
+        nftData.isEnable = true;
+        _burnFor(_msgSender(), ABDKMath64x64.mulu(cppcNum, 1));
+        return pid;
     }
 
     using ECDSA for bytes32;
@@ -306,7 +333,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         returns (bool success)
     {
         // This recreates the message hash that was signed on the client.
-        uint256 tradePrice = signedPr.tradePrice;
+        int128 tradePrice = signedPr.tradePrice;
         uint256 nonce = signedPr.nonce;
         bytes calldata signature = signedPr.signature;
         bytes32 hash = keccak256(
@@ -714,11 +741,7 @@ contract SatoshiOpstion is ERC721, Ownable {
 
     function _mintNft(address _to) internal returns (uint256) {
         _mint(_to, _totalSupply);
-        // console.log("_totalSupply");
-        // _totalSupply = _totalSupply + 1;
-        // console.logUint(_totalSupply);
         return _totalSupply++;
-        // return _totalSupply;
     }
 
     // 记录 id
@@ -731,12 +754,13 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     function _mintCppc(address to, uint256 amount) internal {
-        ERC20Interface(cppc).mint(to,amount);
+        ERC20Interface(cppc).mint(to, amount);
     }
 
     function _burnFor(address from, uint256 amount) internal {
+        console.log("_burnFor");
+        console.logUint(amount);
         cppc.safeTransferFrom(from, address(this), amount);
         ERC20Interface(cppc).burn(amount);
     }
-
 }
