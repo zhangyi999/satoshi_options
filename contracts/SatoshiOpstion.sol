@@ -321,7 +321,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         nftData.bk = bk;
         nftData.K = K;
         nftData.isEnable = true;
-        _burnFor(_msgSender(), ABDKMath64x64.mulu(cppcNum, 1));
+        // _burnFor(_msgSender(), ABDKMath64x64.mulu(cppcNum, 1));
         return pid;
     }
 
@@ -460,7 +460,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 平仓
     function Withdraw(uint256 _pid, uint256 btcPrice)
         public
-        view
+        payable
         isMyNFTPid(_pid)
     {
         NftData memory nftData = this.getCppcInfo(_pid);
@@ -512,7 +512,8 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 LiquidationNum = getLiquidationNum(_getLiquidationNumInfo);
         console.log("LiquidationNum--");
         console.logInt(LiquidationNum);
-
+        console.logUint(ABDKMath64x64.mulu(LiquidationNum, 1));
+        _mintCppc(_msgSender(), ABDKMath64x64.mulu(LiquidationNum, 1));
         // return LiquidationNum;
     }
 
