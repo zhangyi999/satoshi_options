@@ -36,6 +36,8 @@ contract SatoshiOpstion is ERC721, Ownable {
 
     address DATA_PROVIDER = 0x9548B3682cD65D3265C92d5111a9782c86Ca886d;
 
+    mapping(address => mapping(uint256 => bool)) private seenNonces;
+
     struct DeltaItem {
         int128 delta; //2**64  int128
         int128 L1; //2**64  int128
@@ -103,6 +105,11 @@ contract SatoshiOpstion is ERC721, Ownable {
         _pcpct = __pcpct;
         r = _r;
         // _V = __V;
+    }
+
+    // 设置当前BTC价格
+    function SetCurrBtcPrice(int128 _currBtc) public onlyOwner {
+        currBtc = _currBtc;
     }
 
     /**
@@ -177,66 +184,84 @@ contract SatoshiOpstion is ERC721, Ownable {
         return NftDatas;
     }
 
-    // 开仓
-    function open(
-        bool direction,
-        int128 delta,
-        int128 bk,
-        int128 cppcNum
-    ) public returns (uint256 pid) {
-        int128 _omg;
-        int128 _pbc;
-        if (direction) {
-            _omg = getUpOmg(delta);
-        } else {
-            _omg = getDownOmg(delta);
-        }
-        uint64 _omgUInt = ABDKMath64x64.toUInt(_omg);
-        console.log("_omgUInt");
-        console.logUint(_omgUInt);
-        int128 K = getBk(bk);
-        getPurchaseQuantityInfo
-            memory _getPurchaseQuantityInfo = getPurchaseQuantityInfo(
-                direction,
-                bk,
-                delta,
-                cppcNum
-            );
-        _pbc = getPurchaseQuantity(_getPurchaseQuantityInfo);
-        // console.log("_pbc");
-        // console.logInt(_pbc);
-
-        pid = _mintNft(_msgSender());
-
-        // console.log("_pid");
-        // console.logUint(pid);
-        NftData storage nftData = nftStore[pid];
-        // nftData._address = _nftData._address;
-        nftData.delta = delta;
-        nftData.pid = pid;
-        nftData.direction = direction;
-        nftData.cppcNum = cppcNum;
-        nftData.createTime = (block.timestamp / 1000);
-        nftData.openPrice = currBtc;
-        nftData.bk = bk;
-        nftData.K = K;
-        nftData.isEnable = true;
-
-        return pid;
-    }
-
-    using ECDSA for bytes32;
     struct signedPrice {
         uint256 tradePrice;
         uint256 nonce;
         bytes signature;
     }
 
-    //得到价格
-    function _checkIdentityAndUpdateOracle(
+    // 开仓
+    function open(
+        bool direction,
+        int128 delta,
+        int128 bk,
+        int128 cppcNum,
         address tradeToken,
         signedPrice calldata signedPr
-    ) public returns (bool success) {
+    ) public returns (uint256 pid) {
+        int128 _omg;
+        int128 _pbc;
+
+        bool isIdentity = _checkIdentity(tradeToken, signedPr);
+        console.log("isIdentity");
+        console.logBool(isIdentity);
+        require(isIdentity, "Price Error.");
+        uint256 _currBtc = signedPr.tradePrice;
+        console.log("_currBtc");
+        console.logUint(_currBtc);
+        int128 _currBtc1 = ABDKMath64x64.fromUInt(_currBtc);
+        // console.logInt(_currBtc1);
+
+        // SetCurrBtcPrice(ABDKMath64x64.fromUInt(_currBtc1));
+        return 0;
+
+        // if (direction) {
+        //     _omg = getUpOmg(delta);
+        // } else {
+        //     _omg = getDownOmg(delta);
+        // }
+
+        // uint64 _omgUInt = ABDKMath64x64.toUInt(_omg);
+        // console.log("_omgUInt");
+        // console.logUint(_omgUInt);
+        // int128 K = getBk(bk);
+        // getPurchaseQuantityInfo
+        //     memory _getPurchaseQuantityInfo = getPurchaseQuantityInfo(
+        //         direction,
+        //         bk,
+        //         delta,
+        //         cppcNum
+        //     );
+        // _pbc = getPurchaseQuantity(_getPurchaseQuantityInfo);
+        // // console.log("_pbc");
+        // // console.logInt(_pbc);
+
+        // pid = _mintNft(_msgSender());
+
+        // // console.log("_pid");
+        // // console.logUint(pid);
+        // NftData storage nftData = nftStore[pid];
+        // // nftData._address = _nftData._address;
+        // nftData.delta = delta;
+        // nftData.pid = pid;
+        // nftData.direction = direction;
+        // nftData.cppcNum = cppcNum;
+        // nftData.createTime = (block.timestamp / 1000);
+        // nftData.openPrice = currBtc;
+        // nftData.bk = bk;
+        // nftData.K = K;
+        // nftData.isEnable = true;
+
+        // return pid;
+    }
+
+    using ECDSA for bytes32;
+
+    //验证前端价格是否正确
+    function _checkIdentity(address tradeToken, signedPrice calldata signedPr)
+        public
+        returns (bool success)
+    {
         // This recreates the message hash that was signed on the client.
         uint256 tradePrice = signedPr.tradePrice;
         uint256 nonce = signedPr.nonce;
@@ -254,14 +279,15 @@ contract SatoshiOpstion is ERC721, Ownable {
         console.logAddress(DATA_PROVIDER);
         require(signer == DATA_PROVIDER, "CBBC: INVALID_SIGNER.");
 
-        // require(!seenNonces[signer][nonce], "CBBC: USED_NONCE");
-        // seenNonces[signer][nonce] = true;
+        require(!seenNonces[signer][nonce], "CBBC: USED_NONCE");
+        seenNonces[signer][nonce] = true;
 
         // update the oracle
         // address tradePriceOracle = marketOracle.priceMedianOracles(tradeToken);
         // IMedianOracle(tradePriceOracle).pushReport(tradePrice);
         console.log("ok");
         success = true;
+        return success;
     }
 
     // 通过Delta获取配置
