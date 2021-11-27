@@ -6,9 +6,52 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/Math.sol";
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "./libraries/ECDSA.sol";
+
 import "hardhat/console.sol";
 
+interface ERC20Interface {
+    function balanceOf(address user) external view returns (uint256);
+    function mint(address to, uint256 amount) external;
+    function burn(uint256 amount) external;
+}
+
+library SafeToken {
+    function myBalance(address token) internal view returns (uint256) {
+        return ERC20Interface(token).balanceOf(address(this));
+    }
+
+    function balanceOf(address token, address user) internal view returns (uint256) {
+        return ERC20Interface(token).balanceOf(user);
+    }
+
+    function safeApprove(address token, address to, uint256 value) internal {
+        // bytes4(keccak256(bytes('approve(address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x095ea7b3, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "!safeApprove");
+    }
+
+    function safeTransfer(address token, address to, uint256 value) internal {
+        // bytes4(keccak256(bytes('transfer(address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0xa9059cbb, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "!safeTransfer");
+    }
+
+    function safeTransferFrom(address token, address from, address to, uint256 value) internal {
+        // bytes4(keccak256(bytes('transferFrom(address,address,uint256)')));
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(0x23b872dd, from, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "!safeTransferFrom");
+    }
+
+    function safeTransferETH(address to, uint256 value) internal {
+        (bool success, ) = to.call{value:value}(new bytes(0));
+        require(success, "!safeTransferETH");
+    }
+}
+
 contract SatoshiOpstion is ERC721, Ownable {
+
+    using SafeToken for address;
+
     // 筹码
     address public cppc;
 
@@ -686,4 +729,14 @@ contract SatoshiOpstion is ERC721, Ownable {
     ) internal override {
         _idBalance[to].push(tokenId);
     }
+
+    function _mintCppc(address to, uint256 amount) internal {
+        ERC20Interface(cppc).mint(to,amount);
+    }
+
+    function _burnFor(address from, uint256 amount) internal {
+        cppc.safeTransferFrom(from, address(this), amount);
+        ERC20Interface(cppc).burn(amount);
+    }
+
 }
