@@ -126,7 +126,7 @@ describe("Greeter", function () {
     let tToken0Approve = await tToken0.connect(user).approve(greeter.address, MAX_UINT256);
     await tToken0Approve.wait()
     // greeter.
-    tx = await await greeter.connect(user).SetConfig(
+    let tx = await await greeter.SetConfig(
       getInt128(currBtc),
       getInt128(depositFee),
       getInt128(withdrawFee),
@@ -153,7 +153,7 @@ describe("Greeter", function () {
       ]
     })
     // console.log(LTable)
-    let tx = await greeter.SetLTable(LTable);
+    tx = await greeter.SetLTable(LTable);
 
     // let DeltaTable = await greeter.getDeltaTable(
     //   getInt128(ltable[0]["delta"])
@@ -235,7 +235,7 @@ describe("Greeter", function () {
     let _delta = getInt128(ltable[0]["delta"]);
     console.log("开仓Delta", _delta);
 
-    let open = await greeter.open(
+    let open = await greeter.connect(user).open(
       true,// direction;
       getInt128(ltable[0]["delta"]),// delta;
       getInt128(2),// bk;
@@ -255,7 +255,7 @@ describe("Greeter", function () {
 
     // 平仓
 
-    let withdraw = await greeter.Withdraw(
+    let withdraw = await greeter.connect(user).Withdraw(
       pid,// direction;
       getInt128(86000),//btcPrice
     )
