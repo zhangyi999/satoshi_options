@@ -61,9 +61,15 @@ async function setupContracts() {
   deployer = accounts[0]
   user = accounts[1]
 
-  const erc20Token = await ethers.getContractFactory("ERC20", deployer);
+  const cppcToken = await ethers.getContractFactory("../contracts/Cppc.sol:Cppc");
   // tToken0 = await erc20Token.deploy(TOTAL_SUPPLY);
   // factory = await (await ethers.getContractFactory("CbbcFactory", deployer)).deploy();
+
+  // const cppcToken = await ethers.getContractFactory("Cppc", deployer);
+  tToken0 = await cppcToken.deploy(TOTAL_SUPPLY);
+  await tToken0.deployed();
+  const _b = await deployer.getBalance()
+  console.log("_b", _b);
 }
 
 
@@ -83,14 +89,19 @@ async function getPriceData(tokenAddress, tradePrice) {
   };
 }
 
-
+const DECIMALS = 18;
+const TOTAL_SUPPLY = ethers.utils.parseUnits('1000000', DECIMALS);
 describe("Greeter", function () {
-  beforeEach("set up the contracts", setupContracts);
+  beforeEach("set up the contracts", async function () {
+    setupContracts();
+
+  });
 
 
   it("Should return the new greeting once it's changed", async function () {
     accounts = await ethers.getSigners();
     deployer = accounts[0];
+    // console.log("accounts", deployer);
     const Greeter = await ethers.getContractFactory("SatoshiOpstion");
     const greeter = await Greeter.deploy('cppcNft', 'cppc');
     await greeter.deployed();
@@ -121,7 +132,7 @@ describe("Greeter", function () {
         getInt128(item.l4),
       ]
     })
-    console.log(LTable)
+    // console.log(LTable)
     let tx = await greeter.SetLTable(LTable);
 
     // let DeltaTable = await greeter.getDeltaTable(
@@ -191,7 +202,7 @@ describe("Greeter", function () {
     // 设置BTC价格
     const tradeToken = "0x279F9ABfa3495ac679BAe22590d96777eF65D434";
     let signedPr = await getPriceData(tradeToken, getInt128(65000));
-    console.log("signedPr", signedPr);
+    // console.log("signedPr", signedPr);
     // let checkIdentity = await greeter._checkIdentity(
     //   tradeToken,
     //   signedPr,
@@ -212,14 +223,14 @@ describe("Greeter", function () {
       signedPr
     )
     open.wait();
-    console.log("open--", open)
+    // console.log("open--", open)
 
     // 获取持仓
     let NftDatas = await greeter.getNFT()
     const pid = NftDatas[0].pid.toString()
     const cppcNum = NftDatas[0].cppcNum.toString()
     const createTime = NftDatas[0].createTime.toString()
-    console.log("NftDatas--", NftDatas, pid, cppcNum, createTime)
+    // console.log("NftDatas--", NftDatas, pid, cppcNum, createTime)
 
     // 平仓
 

@@ -14,10 +14,12 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const Greeter = await hre.ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  // const Greeter = await hre.ethers.getContractFactory("Greeter");
+  const Greeter = await hre.ethers.getContractFactory("Cppc");
+  const greeter = await Greeter.deploy();
 
   await greeter.deployed();
+  greeter.mint("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", 10000)
 
   console.log("Greeter deployed to:", greeter.address);
 }
