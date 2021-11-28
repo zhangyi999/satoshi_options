@@ -27,6 +27,9 @@ async function main() {
 
     const satoshiOpstion = await SatoshiOpstion.deploy(cppc.address, 'btc-opstion', 'BTC_OP');
     console.log(`export const SatoshiOpstion = '${satoshiOpstion.address}'`);
+
+    let tx = await cppc.setupMinterRole(satoshiOpstion.address)
+    await tx.wait()
 }
 
 // We recommend this pattern to be able to use async/await everywhere

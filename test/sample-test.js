@@ -125,8 +125,11 @@ describe("Greeter", function () {
     console.log("CppcAddress--Balance", _tToken0B.toString());
     let tToken0Approve = await tToken0.connect(user).approve(greeter.address, MAX_UINT256);
     await tToken0Approve.wait()
+
+    let tx = await tToken0.setupMinterRole(greeter.address)
+    await tx.wait()
     // greeter.
-    let tx = await await greeter.SetConfig(
+    tx = await await greeter.SetConfig(
       getInt128(currBtc),
       getInt128(depositFee),
       getInt128(withdrawFee),
@@ -154,7 +157,7 @@ describe("Greeter", function () {
     })
     // console.log(LTable)
     tx = await greeter.SetLTable(LTable);
-
+    
     // let DeltaTable = await greeter.getDeltaTable(
     //   getInt128(ltable[0]["delta"])
     // );
@@ -247,10 +250,13 @@ describe("Greeter", function () {
     // console.log("open--", open)
 
     // 获取持仓
-    let NftDatas = await greeter.getNFT()
-    const pid = NftDatas[0].pid.toString()
-    const cppcNum = NftDatas[0].cppcNum.toString()
-    const createTime = NftDatas[0].createTime.toString()
+    let NftDatas = await greeter.balanceOfOwner(user.address)
+    console.log({
+      NftDatas
+    })
+    const pid = NftDatas[0].toString()
+    // const cppcNum = NftDatas[0].cppcNum.toString()
+    // const createTime = NftDatas[0].createTime.toString()
     // console.log("NftDatas--", NftDatas, pid, cppcNum, createTime)
 
     // 平仓

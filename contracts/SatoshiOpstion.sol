@@ -184,7 +184,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     }
 
     // 设置当前BTC价格
-    function SetCurrBtcPrice(int128 _currBtc) public onlyOwner {
+    function _SetCurrBtcPrice(int128 _currBtc) internal {
         currBtc = _currBtc;
     }
 
@@ -283,7 +283,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         console.logBool(isIdentity);
         require(isIdentity, "Price Error.");
         int128 _currBtc = signedPr.tradePrice;
-        SetCurrBtcPrice(_currBtc);
+        _SetCurrBtcPrice(_currBtc);
 
         if (direction) {
             _omg = getUpOmg(delta);
