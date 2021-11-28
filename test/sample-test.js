@@ -61,12 +61,12 @@ async function setupContracts() {
   deployer = accounts[0]
   user = accounts[1]
 
-  const cppcToken = await ethers.getContractFactory("../contracts/Cppc.sol:Cppc");
+  const cppcToken = await ethers.getContractFactory("contracts/Cppc.sol:Cppc");
   // tToken0 = await erc20Token.deploy(TOTAL_SUPPLY);
   // factory = await (await ethers.getContractFactory("CbbcFactory", deployer)).deploy();
 
   // const cppcToken = await ethers.getContractFactory("Cppc", deployer);
-  tToken0 = await cppcToken.deploy(TOTAL_SUPPLY);
+  tToken0 = await cppcToken.deploy();
   await tToken0.deployed();
   const _b = await deployer.getBalance()
   console.log("_b", _b);
