@@ -5,6 +5,9 @@ const { ethers } = require("hardhat");
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 
+const {BigNumber:BN} = ethers
+
+// console.log(.toHexString())
 
 
 
@@ -74,7 +77,8 @@ async function setupContracts() {
   console.log("tToken0.address", tToken0.address);
 
   await tToken0.deployed();
-  tToken0.mint(tToken0.address, 1000);
+  let tx = await tToken0.mint(user.address, BN.from(100000).mul('0x'+(1e18).toString(16)));
+  await tx.wait()
   // const _b = await user.getBalance()
   // console.log("_b", _b.toString());
 }
@@ -117,12 +121,12 @@ describe("Greeter", function () {
     console.log("CppcAddress--", tToken0.address)
     console.log("setCppc--end")
     // console.log("greeter.address", greeter.address)
-    const _tToken0B = await user.getBalance()
+    const _tToken0B = await tToken0.balanceOf(user.address)
     console.log("CppcAddress--Balance", _tToken0B.toString());
-    let tToken0Approve = await tToken0.approve(greeter.address, MAX_UINT256);
+    let tToken0Approve = await tToken0.connect(user).approve(greeter.address, MAX_UINT256);
     await tToken0Approve.wait()
     // greeter.
-    expect(await greeter.SetConfig(
+    tx = await await greeter.connect(user).SetConfig(
       getInt128(currBtc),
       getInt128(depositFee),
       getInt128(withdrawFee),
@@ -136,7 +140,8 @@ describe("Greeter", function () {
       getInt128(pcpct),
       getInt128(r),
       // getInt128(10000000000),
-    ));
+    )
+    await tx.wait()
 
     const LTable = ltable.map((item) => {
       return [
