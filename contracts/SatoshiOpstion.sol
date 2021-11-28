@@ -321,7 +321,9 @@ contract SatoshiOpstion is ERC721, Ownable {
         nftData.bk = bk;
         nftData.K = K;
         nftData.isEnable = true;
-        // _burnFor(_msgSender(), ABDKMath64x64.mulu(cppcNum, 1));
+        console.log("_msgSender");
+        console.logAddress(_msgSender());
+        _burnFor(_msgSender(), ABDKMath64x64.mulu(cppcNum, 1));
         return pid;
     }
 
@@ -761,6 +763,9 @@ contract SatoshiOpstion is ERC721, Ownable {
     function _burnFor(address from, uint256 amount) internal {
         console.log("_burnFor");
         console.logUint(amount);
+        console.logAddress(from);
+        console.log("cppcAddress");
+        console.logAddress(cppc);
         cppc.safeTransferFrom(from, address(this), amount);
         ERC20Interface(cppc).burn(amount);
     }

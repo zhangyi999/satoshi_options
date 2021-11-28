@@ -24,6 +24,8 @@ function getInt128(num) {
   // console.log("_num", _num);
   return _num
 }
+const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1)
+
 const currBtc = 65000;
 const depositFee = 0.01;
 const withdrawFee = 0.01;
@@ -60,16 +62,21 @@ async function setupContracts() {
   accounts = await ethers.getSigners()
   deployer = accounts[0]
   user = accounts[1]
+  // console.log("user", user)
 
   const cppcToken = await ethers.getContractFactory("contracts/Cppc.sol:Cppc");
+  // console.log("cppcToken", cppcToken)
   // tToken0 = await erc20Token.deploy(TOTAL_SUPPLY);
   // factory = await (await ethers.getContractFactory("CbbcFactory", deployer)).deploy();
 
   // const cppcToken = await ethers.getContractFactory("Cppc", deployer);
   tToken0 = await cppcToken.deploy();
+  console.log("tToken0.address", tToken0.address);
+
   await tToken0.deployed();
-  const _b = await deployer.getBalance()
-  console.log("_b", _b);
+  tToken0.mint(tToken0.address, 1000);
+  // const _b = await user.getBalance()
+  // console.log("_b", _b.toString());
 }
 
 
@@ -105,7 +112,15 @@ describe("Greeter", function () {
     const Greeter = await ethers.getContractFactory("SatoshiOpstion");
     const greeter = await Greeter.deploy('cppcNft', 'cppc');
     await greeter.deployed();
-
+    console.log("setCppc--start")
+    await greeter.setCppc(tToken0.address);
+    console.log("CppcAddress--", tToken0.address)
+    console.log("setCppc--end")
+    // console.log("greeter.address", greeter.address)
+    const _tToken0B = await user.getBalance()
+    console.log("CppcAddress--Balance", _tToken0B.toString());
+    let tToken0Approve = await tToken0.approve(greeter.address, MAX_UINT256);
+    await tToken0Approve.wait()
     // greeter.
     expect(await greeter.SetConfig(
       getInt128(currBtc),
@@ -214,6 +229,7 @@ describe("Greeter", function () {
     // 开仓
     let _delta = getInt128(ltable[0]["delta"]);
     console.log("开仓Delta", _delta);
+
     let open = await greeter.open(
       true,// direction;
       getInt128(ltable[0]["delta"]),// delta;
