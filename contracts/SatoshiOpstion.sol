@@ -382,6 +382,9 @@ contract SatoshiOpstion is ERC721, Ownable {
             ABDKMath64x64.div(ABDKMath64x64.sub(_eta1_128, L1), _eta1_128),
             ABDKMath64x64.div(L2, ABDKMath64x64.sub(L2, L1))
         );
+        //  _omg
+        console.log("_omg");
+        console.logUint(ABDKMath64x64.mulu(_omg, 1));
         return _omg;
     }
 
@@ -420,41 +423,99 @@ contract SatoshiOpstion is ERC721, Ownable {
             _getPurchaseQuantityInfo.delta
         );
         int128 delta = _getPurchaseQuantityInfo.delta;
-        uint256 l1_uint256 = ABDKMath64x64.mulu(deltaItem.L1, 1);
-        uint256 l2_uint256 = ABDKMath64x64.mulu(deltaItem.L2, 1);
-        uint256 l3_uint256 = ABDKMath64x64.mulu(deltaItem.L3, 1);
-        uint256 l4_uint256 = ABDKMath64x64.mulu(deltaItem.L4, 1);
+        // uint256 l1_uint256 = ABDKMath64x64.mulu(deltaItem.L1, 1);
+        // uint256 l2_uint256 = ABDKMath64x64.mulu(deltaItem.L2, 1);
+        // uint256 l3_uint256 = ABDKMath64x64.mulu(deltaItem.L3, 1);
+        // uint256 l4_uint256 = ABDKMath64x64.mulu(deltaItem.L4, 1);
 
         int128 omg = getUpOmg(delta);
         if (!_getPurchaseQuantityInfo.direction) {
             omg = getDownOmg(delta);
         }
-        int128 omg1 = ABDKMath64x64.mul(
+
+        
+        int128 omg1 = ABDKMath64x64.div(
             omg,
-            ABDKMath64x64.pow(_getPurchaseQuantityInfo.bk, l1_uint256)
+            ABDKMath64x64.exp_2(
+                ABDKMath64x64.mul(
+                    deltaItem.L1,
+                    ABDKMath64x64.log_2(
+                        _getPurchaseQuantityInfo.bk
+                    )
+                )
+            )
         );
-        console.logInt(omg1);
-        console.logInt(omg);
-        int128 omg2 = ABDKMath64x64.mul(
+        int128 omg2 = ABDKMath64x64.div(
             ABDKMath64x64.sub(1 * 2**64, omg),
-            ABDKMath64x64.pow(_getPurchaseQuantityInfo.bk, l2_uint256)
+            ABDKMath64x64.exp_2(
+                ABDKMath64x64.mul(
+                    deltaItem.L2,
+                    ABDKMath64x64.log_2(
+                        _getPurchaseQuantityInfo.bk
+                    )
+                )
+            )
         );
-        console.logInt(omg2);
+        console.log("l2_uint256 %s --------- l1_uint256 %s ",uint128(deltaItem.L2), uint128(deltaItem.L1));
+        console.logInt(omg);
+        console.logInt(_getPurchaseQuantityInfo.bk);
+        console.logInt(
+            ABDKMath64x64.exp_2(
+                ABDKMath64x64.mul(
+                    deltaItem.L1,
+                    ABDKMath64x64.log_2(
+                        _getPurchaseQuantityInfo.bk
+                    )
+                )
+            )
+        );
+        console.logInt(
+            ABDKMath64x64.exp_2(
+                ABDKMath64x64.mul(
+                    deltaItem.L2,
+                    ABDKMath64x64.log_2(
+                        _getPurchaseQuantityInfo.bk
+                    )
+                )
+            )
+        );
 
         if (!_getPurchaseQuantityInfo.direction) {
             omg1 = ABDKMath64x64.div(
                 omg,
-                ABDKMath64x64.pow(_getPurchaseQuantityInfo.bk, l3_uint256)
+                ABDKMath64x64.exp_2(
+                    ABDKMath64x64.mul(
+                        deltaItem.L3,
+                        ABDKMath64x64.log_2(
+                            _getPurchaseQuantityInfo.bk
+                        )
+                    )
+                )
             );
             omg2 = ABDKMath64x64.div(
                 ABDKMath64x64.sub(1 * 2**64, omg),
-                ABDKMath64x64.pow(_getPurchaseQuantityInfo.bk, l4_uint256)
+                ABDKMath64x64.exp_2(
+                    ABDKMath64x64.mul(
+                        deltaItem.L4,
+                        ABDKMath64x64.log_2(
+                            _getPurchaseQuantityInfo.bk
+                        )
+                    )
+                )
             );
         }
-        
-        // console.logInt(omg1);
-        // console.log("omg2");
-        // console.logInt(omg2);
+        console.log("omg");
+        console.logInt(omg);
+        console.log("omg1-rl");
+       
+        console.logInt(_getPurchaseQuantityInfo.bk);
+        console.log("omg1");
+        console.logInt(omg1);
+        console.log("omg2-rl");
+        console.log("omg2");
+        console.logInt(omg2);
+        console.log("P0");
+        console.logInt(ABDKMath64x64.add(omg1, omg2));
         int128 _Q = ABDKMath64x64.div(
             _getPurchaseQuantityInfo._i,
             ABDKMath64x64.add(omg1, omg2)
