@@ -433,10 +433,13 @@ contract SatoshiOpstion is ERC721, Ownable {
             omg,
             ABDKMath64x64.pow(_getPurchaseQuantityInfo.bk, l1_uint256)
         );
+        console.logInt(omg1);
+        console.logInt(omg);
         int128 omg2 = ABDKMath64x64.mul(
             ABDKMath64x64.sub(1 * 2**64, omg),
             ABDKMath64x64.pow(_getPurchaseQuantityInfo.bk, l2_uint256)
         );
+        console.logInt(omg2);
 
         if (!_getPurchaseQuantityInfo.direction) {
             omg1 = ABDKMath64x64.div(
@@ -448,7 +451,7 @@ contract SatoshiOpstion is ERC721, Ownable {
                 ABDKMath64x64.pow(_getPurchaseQuantityInfo.bk, l4_uint256)
             );
         }
-        // console.log("omg1");
+        
         // console.logInt(omg1);
         // console.log("omg2");
         // console.logInt(omg2);
