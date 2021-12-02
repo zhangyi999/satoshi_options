@@ -163,23 +163,23 @@ describe("Greeter", function () {
     // );
     // console.log("DeltaTable--", DeltaTable);
 
-    // let upOmg = await greeter.getUpOmg(
-    //   getInt128(ltable[0]["delta"])
-    // );
-    // console.log("upOmg--", upOmg.toString());
+    let upOmg = await greeter.getUpOmg(
+      getInt128(ltable[0]["delta"])
+    );
+    console.log("upOmg--", upOmg.toString());
 
-    // let downOmg = await greeter.getDownOmg(
-    //   getInt128(ltable[0]["delta"])
-    // );
-    // console.log("downOmg--", downOmg.toString())
+    let downOmg = await greeter.getDownOmg(
+      getInt128(ltable[0]["delta"])
+    );
+    console.log("downOmg--", downOmg.toString())
 
-    // let purchaseQuantity = await greeter.getPurchaseQuantity([
-    //   true,// direction;
-    //   getInt128(2),// bk;
-    //   getInt128(ltable[0]["delta"]),// delta;
-    //   getInt128(2)// _i;
-    // ])
-    // console.log("purchaseQuantity--", purchaseQuantity.toString())
+    let purchaseQuantity = await greeter.getPurchaseQuantity([
+      true,// direction;
+      getInt128(2),// bk;
+      getInt128(ltable[0]["delta"]),// delta;
+      getInt128(2)// _i;
+    ])
+    console.log("purchaseQuantity--", purchaseQuantity.toString())
 
     // let TB = await greeter.getTB(
     //   true,// direction;
@@ -222,51 +222,51 @@ describe("Greeter", function () {
     // // console.log("LiquidationNum--", LiquidationNum.toString())
 
 
-    // 设置BTC价格
-    const tradeToken = "0x279F9ABfa3495ac679BAe22590d96777eF65D434";
-    let signedPr = await getPriceData(tradeToken, getInt128(65000));
-    // console.log("signedPr", signedPr);
-    // let checkIdentity = await greeter._checkIdentity(
+    // // 设置BTC价格
+    // const tradeToken = "0x279F9ABfa3495ac679BAe22590d96777eF65D434";
+    // let signedPr = await getPriceData(tradeToken, getInt128(65000));
+    // // console.log("signedPr", signedPr);
+    // // let checkIdentity = await greeter._checkIdentity(
+    // //   tradeToken,
+    // //   signedPr,
+    // // )
+    // // // withdraw.wait();
+    // // console.log("checkIdentity--", checkIdentity)
+
+
+    // // 开仓
+    // let _delta = getInt128(ltable[0]["delta"]);
+    // console.log("开仓Delta", _delta);
+
+    // let open = await greeter.connect(user).open(
+    //   true,// direction;
+    //   getInt128(ltable[0]["delta"]),// delta;
+    //   getInt128(2),// bk;
+    //   getInt128(500),// cppcNum;
     //   tradeToken,
-    //   signedPr,
+    //   signedPr
+    // )
+    // open.wait();
+    // // console.log("open--", open)
+
+    // // 获取持仓
+    // let NftDatas = await greeter.balanceOfOwner(user.address)
+    // console.log({
+    //   NftDatas
+    // })
+    // const pid = NftDatas[0].toString()
+    // // const cppcNum = NftDatas[0].cppcNum.toString()
+    // // const createTime = NftDatas[0].createTime.toString()
+    // // console.log("NftDatas--", NftDatas, pid, cppcNum, createTime)
+
+    // // 平仓
+
+    // let withdraw = await greeter.connect(user).Withdraw(
+    //   pid,// direction;
+    //   getInt128(86000),//btcPrice
     // )
     // // withdraw.wait();
-    // console.log("checkIdentity--", checkIdentity)
-
-
-    // 开仓
-    let _delta = getInt128(ltable[0]["delta"]);
-    console.log("开仓Delta", _delta);
-
-    let open = await greeter.connect(user).open(
-      true,// direction;
-      getInt128(ltable[0]["delta"]),// delta;
-      getInt128(2),// bk;
-      getInt128(500),// cppcNum;
-      tradeToken,
-      signedPr
-    )
-    open.wait();
-    // console.log("open--", open)
-
-    // 获取持仓
-    let NftDatas = await greeter.balanceOfOwner(user.address)
-    console.log({
-      NftDatas
-    })
-    const pid = NftDatas[0].toString()
-    // const cppcNum = NftDatas[0].cppcNum.toString()
-    // const createTime = NftDatas[0].createTime.toString()
-    // console.log("NftDatas--", NftDatas, pid, cppcNum, createTime)
-
-    // 平仓
-
-    let withdraw = await greeter.connect(user).Withdraw(
-      pid,// direction;
-      getInt128(86000),//btcPrice
-    )
-    // withdraw.wait();
-    console.log("withdraw--", withdraw)
+    // console.log("withdraw--", withdraw)
 
 
 
