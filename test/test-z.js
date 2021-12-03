@@ -5,7 +5,7 @@ const { ethers } = require("hardhat");
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 
-const {BigNumber:BN} = ethers
+const { BigNumber: BN } = ethers
 
 // console.log(.toHexString())
 
@@ -29,7 +29,7 @@ function getInt128(num) {
 }
 const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1)
 
-const currBtc = 65000;
+const currBtc = 60000;
 const depositFee = 0.01;
 const withdrawFee = 0.01;
 const r = 0.03;
@@ -55,6 +55,13 @@ const ltable = [
     l2: "24.266891",
     l3: "4.032382035",
     l4: "25.90249482"
+  },
+  {
+    delta: "525600",
+    l1: "1026.321008",
+    l2: "21.50882215",
+    l3: "1024.340376",
+    l4: "24.14898351"
   }
 ]
 // CBBCRouter
@@ -77,7 +84,7 @@ async function setupContracts() {
   console.log("tToken0.address", tToken0.address);
 
   await tToken0.deployed();
-  let tx = await tToken0.mint(user.address, BN.from(100000).mul('0x'+(1e18).toString(16)));
+  let tx = await tToken0.mint(user.address, BN.from(100000).mul('0x' + (1e18).toString(16)));
   await tx.wait()
   // const _b = await user.getBalance()
   // console.log("_b", _b.toString());
@@ -157,7 +164,7 @@ describe("Greeter", function () {
     })
     // console.log(LTable)
     tx = await greeter.SetLTable(LTable);
-    
+
     // let DeltaTable = await greeter.getDeltaTable(
     //   getInt128(ltable[0]["delta"])
     // );
@@ -179,7 +186,23 @@ describe("Greeter", function () {
       getInt128(ltable[0]["delta"]),// delta;
       getInt128(2)// _i;
     ])
-    console.log("purchaseQuantity--", purchaseQuantity.toString())
+    // console.log("purchaseQuantity--", purchaseQuantity.toString())
+
+    let TB = await greeter.getTB(
+      true,// direction;
+      getInt128(60000)// K;
+    )
+    console.log("TB--", TB.toString())
+
+    let PBCT = await greeter.getPBCT([
+      true,// direction;
+      getInt128(ltable[0]["delta"]),// delta,
+      getInt128(864000),// t,
+      getInt128(2),// BK,
+      getInt128(120000)// K;
+    ]
+    )
+    console.log("PBCT--", PBCT.toString())
 
 
   });

@@ -110,6 +110,7 @@ contract SatoshiOpstion is ERC721, Ownable {
     int128 r; //SettlementBTCPrice 参数 0.03
     // int128 _V; //10000000000*2**64 btc全球总交易量
 
+    int128 SECONDS_IN_A_YEAR = ABDKMath64x64.fromUInt(31536000);
     address DATA_PROVIDER = 0x9548B3682cD65D3265C92d5111a9782c86Ca886d;
 
     mapping(address => mapping(uint256 => bool)) private seenNonces;
@@ -186,6 +187,11 @@ contract SatoshiOpstion is ERC721, Ownable {
     // 设置当前BTC价格
     function _SetCurrBtcPrice(int128 _currBtc) internal {
         currBtc = _currBtc;
+    }
+
+    function pow64x64(int128 a, int128 pow) internal pure returns (int128) {
+        return
+            ABDKMath64x64.exp_2(ABDKMath64x64.mul(pow, ABDKMath64x64.log_2(a)));
     }
 
     /**
@@ -433,89 +439,61 @@ contract SatoshiOpstion is ERC721, Ownable {
             omg = getDownOmg(delta);
         }
 
-        
         int128 omg1 = ABDKMath64x64.div(
             omg,
-            ABDKMath64x64.exp_2(
-                ABDKMath64x64.mul(
-                    deltaItem.L1,
-                    ABDKMath64x64.log_2(
-                        _getPurchaseQuantityInfo.bk
-                    )
-                )
-            )
+            pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L1)
         );
         int128 omg2 = ABDKMath64x64.div(
             ABDKMath64x64.sub(1 * 2**64, omg),
-            ABDKMath64x64.exp_2(
-                ABDKMath64x64.mul(
-                    deltaItem.L2,
-                    ABDKMath64x64.log_2(
-                        _getPurchaseQuantityInfo.bk
-                    )
-                )
-            )
+            pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L2)
         );
-        console.log("l2_uint256 %s --------- l1_uint256 %s ",uint128(deltaItem.L2), uint128(deltaItem.L1));
-        console.logInt(omg);
-        console.logInt(_getPurchaseQuantityInfo.bk);
-        console.logInt(
-            ABDKMath64x64.exp_2(
-                ABDKMath64x64.mul(
-                    deltaItem.L1,
-                    ABDKMath64x64.log_2(
-                        _getPurchaseQuantityInfo.bk
-                    )
-                )
-            )
-        );
-        console.logInt(
-            ABDKMath64x64.exp_2(
-                ABDKMath64x64.mul(
-                    deltaItem.L2,
-                    ABDKMath64x64.log_2(
-                        _getPurchaseQuantityInfo.bk
-                    )
-                )
-            )
-        );
+        // console.log(
+        //     "l2_uint256 %s --------- l1_uint256 %s ",
+        //     uint128(deltaItem.L2),
+        //     uint128(deltaItem.L1)
+        // );
+        // console.logInt(omg);
+        // console.logInt(_getPurchaseQuantityInfo.bk);
+
+        // console.logInt(
+        //     ABDKMath64x64.exp_2(
+        //         ABDKMath64x64.mul(
+        //             deltaItem.L1,
+        //             ABDKMath64x64.log_2(_getPurchaseQuantityInfo.bk)
+        //         )
+        //     )
+        // );
+        // console.logInt(
+        //     ABDKMath64x64.exp_2(
+        //         ABDKMath64x64.mul(
+        //             deltaItem.L2,
+        //             ABDKMath64x64.log_2(_getPurchaseQuantityInfo.bk)
+        //         )
+        //     )
+        // );
 
         if (!_getPurchaseQuantityInfo.direction) {
             omg1 = ABDKMath64x64.div(
                 omg,
-                ABDKMath64x64.exp_2(
-                    ABDKMath64x64.mul(
-                        deltaItem.L3,
-                        ABDKMath64x64.log_2(
-                            _getPurchaseQuantityInfo.bk
-                        )
-                    )
-                )
+                pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L3)
             );
             omg2 = ABDKMath64x64.div(
                 ABDKMath64x64.sub(1 * 2**64, omg),
-                ABDKMath64x64.exp_2(
-                    ABDKMath64x64.mul(
-                        deltaItem.L4,
-                        ABDKMath64x64.log_2(
-                            _getPurchaseQuantityInfo.bk
-                        )
-                    )
-                )
+                pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L4)
             );
         }
-        console.log("omg");
-        console.logInt(omg);
-        console.log("omg1-rl");
-       
-        console.logInt(_getPurchaseQuantityInfo.bk);
-        console.log("omg1");
-        console.logInt(omg1);
-        console.log("omg2-rl");
-        console.log("omg2");
-        console.logInt(omg2);
-        console.log("P0");
-        console.logInt(ABDKMath64x64.add(omg1, omg2));
+        // console.log("omg");
+        // console.logInt(omg);
+        // console.log("omg1-rl");
+
+        // console.logInt(_getPurchaseQuantityInfo.bk);
+        // console.log("omg1");
+        // console.logInt(omg1);
+        // console.log("omg2-rl");
+        // console.log("omg2");
+        // console.logInt(omg2);
+        // console.log("P0");
+        // console.logInt(ABDKMath64x64.add(omg1, omg2));
         int128 _Q = ABDKMath64x64.div(
             _getPurchaseQuantityInfo._i,
             ABDKMath64x64.add(omg1, omg2)
@@ -622,6 +600,8 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 omg;
         // console.log("getPBCT--");
         // console.logInt(_getPBCTInfo.delta);
+        // console.logInt(_getPBCTInfo.t);
+        // console.logInt(_getPBCTInfo.K);
         // console.logBool(_getPBCTInfo.direction);
         DeltaItem memory _DeltaItem = getDeltaTable(_getPBCTInfo.delta);
         if (_getPBCTInfo.direction) {
@@ -633,29 +613,37 @@ contract SatoshiOpstion is ERC721, Ownable {
             l2Orl4 = _DeltaItem.L4;
             omg = getDownOmg(_getPBCTInfo.delta);
         }
-
-        console.log("getPBCT_l1Orl3");
-        console.logInt(l1Orl3);
-        console.log("getPBCT_l2Orl4");
-        console.logInt(l2Orl4);
+        // console.log("omg");
+        // console.logInt(omg);
+        // console.log("getPBCT_l1Orl3");
+        // console.logInt(l1Orl3);
+        // console.log("getPBCT_l2Orl4");
+        // console.logInt(l2Orl4);
         // console.log("omg");
         // console.logInt(omg);
         // uint256 l1Orl3_uint256 = ABDKMath64x64.mulu(l1Orl3, 1);
         // uint256 l2Orl4_uint256 = ABDKMath64x64.mulu(l2Orl4, 1);
         // int128 K = getBk(_getPBCTInfo.BK);
-        // int128 _tb = getTB(true, _getPBCTInfo.BK);
-        int128 _a1 = ABDKMath64x64.div(
-            getTB(_getPBCTInfo.direction, _getPBCTInfo.K),
-            _getPBCTInfo.K
-        );
-        int128 _a1_l1 = ABDKMath64x64.pow(_a1, ABDKMath64x64.mulu(l1Orl3, 1));
+        int128 _tb = getTB(_getPBCTInfo.direction, _getPBCTInfo.K);
+        // console.log("_tb");
+        // console.logInt(_tb);
+        int128 _a1 = ABDKMath64x64.div(_tb, _getPBCTInfo.K);
+        // console.log("_a1");
+        // console.logInt(_a1);
+        int128 _a1_l1 = pow64x64(_a1, l1Orl3);
+        // console.log("_a1_l1");
+        // console.logInt(_a1_l1);
         int128 _a1_w_l1 = ABDKMath64x64.mul(omg, _a1_l1);
+        // console.log("_a1_w_l1");
+        // console.logInt(_a1_w_l1);
 
-        int128 _a2_l2 = ABDKMath64x64.pow(_a1, ABDKMath64x64.mulu(l2Orl4, 1));
+        int128 _a2_l2 = pow64x64(_a1, l2Orl4);
         int128 _a2_w_l2 = ABDKMath64x64.mul(
             ABDKMath64x64.sub(1 * 2**64, omg),
             _a2_l2
         );
+        // console.log("_a2_w_l2");
+        // console.logInt(_a2_w_l2);
 
         if (!_getPBCTInfo.direction) {
             _a1_w_l1 = ABDKMath64x64.div(omg, _a1_l1);
@@ -666,13 +654,13 @@ contract SatoshiOpstion is ERC721, Ownable {
         }
 
         int128 _a = ABDKMath64x64.add(_a1_w_l1, _a2_w_l2);
-        console.log("getPBCT_a");
+        console.log("_a");
         console.logInt(_a);
-
-        int128 _deltaT = ABDKMath64x64.mul(_getPBCTInfo.delta, _getPBCTInfo.t);
+        int128 _t = ABDKMath64x64.div(_getPBCTInfo.t, SECONDS_IN_A_YEAR);
+        int128 _deltaT = ABDKMath64x64.mul(_getPBCTInfo.delta, _t);
         console.log("getPBCT_deltaT");
         console.logInt(_deltaT);
-        int128 _b = ABDKMath64x64.exp_2(_deltaT);
+        int128 _b = ABDKMath64x64.exp(_deltaT);
         console.log("getPBCT_b");
         console.logInt(_b);
         // int128 _expNum = ABDKMath64x64.exp_2(_deltaT);
