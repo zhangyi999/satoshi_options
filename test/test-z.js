@@ -175,27 +175,27 @@ describe("Greeter", function () {
     // );
     // console.log("upOmg--", upOmg.toString());
 
-    // let downOmg = await greeter.getDownOmg(
-    //   getInt128(ltable[0]["delta"])
-    // );
-    // console.log("downOmg--", downOmg.toString())
+    let downOmg = await greeter.getDownOmg(
+      getInt128(ltable[0]["delta"])
+    );
+    console.log("downOmg--", downOmg.toString())
 
     let purchaseQuantity = await greeter.getPurchaseQuantity([
-      true,// direction;
+      false,// direction;
       getInt128(2),// bk;
       getInt128(ltable[0]["delta"]),// delta;
       getInt128(2)// _i;
     ])
-    // console.log("purchaseQuantity--", purchaseQuantity.toString())
+    console.log("purchaseQuantity--", purchaseQuantity.toString())
 
     let TB = await greeter.getTB(
-      true,// direction;
+      false,// direction;
       getInt128(60000)// K;
     )
     console.log("TB--", TB.toString())
 
     let PBCT = await greeter.getPBCT([
-      true,// direction;
+      false,// direction;
       getInt128(ltable[0]["delta"]),// delta,
       getInt128(864000),// t,
       getInt128(2),// BK,
@@ -205,25 +205,25 @@ describe("Greeter", function () {
     console.log("PBCT--", PBCT.toString())
 
     let RL = await greeter.getRL([
-      true,// direction;
+      false,// direction;
       getInt128(ltable[0]["delta"]),// delta,
     ]
     )
     console.log("RL--", RL.toString())
 
     let Priceimpact = await greeter.getPriceimpact([
-      "49149741625773706163",// rl;
-      "3342591469105065162",// pbct;
+      "28122421235921778630",// rl; up:49149741625773706163 down:28122421235921778630
+      "17463157245209166766",// pbct; up:3342591469105065162 down:17463157245209166766
       getInt128(2),// Q;
     ]
     )
     console.log("Priceimpact--", Priceimpact.toString())
 
     let LiquidationNum = await greeter.getLiquidationNum([
-      "3342591469105065162",// pbct;
+      "17463157245209166766",// pbct; up:3342591469105065162 down:17463157245209166766
       getInt128(2),// Q;
-      "49149741625773706163",// rl;
-      "6525589768884",// priceimpact;
+      "28122421235921778630",// rl; up:49149741625773706163 down:28122421235921778630
+      "11282497226676",// priceimpact; up:6525589768884 down:11282497226676
     ])
     console.log("LiquidationNum--", LiquidationNum.toString())
 
