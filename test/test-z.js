@@ -39,7 +39,7 @@ const eta1 = 21.51;
 const eta2 = 24.15;
 const p = 0.5645;
 const q = 0.4355;
-const phi = 0.00000015;
+const phi = 0.00000036;
 const pcpct = 0.01;
 const ltable = [
   {
@@ -204,6 +204,28 @@ describe("Greeter", function () {
     )
     console.log("PBCT--", PBCT.toString())
 
+    let RL = await greeter.getRL([
+      true,// direction;
+      getInt128(ltable[0]["delta"]),// delta,
+    ]
+    )
+    console.log("RL--", RL.toString())
+
+    let Priceimpact = await greeter.getPriceimpact([
+      "49149741625773706163",// rl;
+      "3342591469105065162",// pbct;
+      getInt128(2),// Q;
+    ]
+    )
+    console.log("Priceimpact--", Priceimpact.toString())
+
+    let LiquidationNum = await greeter.getLiquidationNum([
+      "3342591469105065162",// pbct;
+      getInt128(2),// Q;
+      "49149741625773706163",// rl;
+      "6525589768884",// priceimpact;
+    ])
+    console.log("LiquidationNum--", LiquidationNum.toString())
 
   });
 
