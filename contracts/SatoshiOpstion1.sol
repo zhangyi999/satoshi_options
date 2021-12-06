@@ -82,7 +82,7 @@ library SafeToken {
     }
 }
 
-contract SatoshiOpstion is ERC721, Ownable {
+contract SatoshiOpstion1 is ERC721, Ownable {
     using SafeToken for address;
 
     // 筹码
@@ -554,6 +554,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 bk = nftData.bk;
         int128 cppcNum = nftData.cppcNum;
         int128 K = nftData.K;
+        int128 BT = currBtc;
         // console.logInt(delta);
         // console.logInt(t);
         // console.logInt(bk);
@@ -564,7 +565,8 @@ contract SatoshiOpstion is ERC721, Ownable {
             bk,
             delta,
             cppcNum,
-            K
+            K,
+            BT
         );
         int128 pbct = getPBCT(_getPBCTInfo);
         console.log("getPBCT--");
@@ -624,6 +626,7 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 t;
         int128 BK;
         int128 K;
+        int128 BT;
     }
 
     // 获取PBCT
@@ -646,7 +649,7 @@ contract SatoshiOpstion is ERC721, Ownable {
             _getPBCTInfo.BK
         );
         int128 _E = getE(_getEInfo);
-        int128 _Bt = _E; //to do
+        int128 _Bt = _getPBCTInfo.BT; //to do
 
         DeltaItem memory _DeltaItem = getDeltaTable(_getPBCTInfo.delta);
         if (_getPBCTInfo.direction) {

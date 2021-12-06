@@ -120,7 +120,7 @@ describe("Greeter", function () {
     accounts = await ethers.getSigners();
     deployer = accounts[0];
     // console.log("accounts", deployer);
-    const Greeter = await ethers.getContractFactory("SatoshiOpstion");
+    const Greeter = await ethers.getContractFactory("SatoshiOpstion1");
     const greeter = await Greeter.deploy('cppcNft', 'cppc');
     await greeter.deployed();
     console.log("setCppc--start")
@@ -170,10 +170,10 @@ describe("Greeter", function () {
     // );
     // console.log("DeltaTable--", DeltaTable);
 
-    // let upOmg = await greeter.getUpOmg(
-    //   getInt128(ltable[0]["delta"])
-    // );
-    // console.log("upOmg--", upOmg.toString());
+    let upOmg = await greeter.getUpOmg(
+      getInt128(ltable[0]["delta"])
+    );
+    console.log("upOmg11--", upOmg.toString());
 
     let downOmg = await greeter.getDownOmg(
       getInt128(ltable[0]["delta"])
@@ -199,7 +199,8 @@ describe("Greeter", function () {
       getInt128(ltable[0]["delta"]),// delta,
       getInt128(864000),// t,
       getInt128(2),// BK,
-      getInt128(120000)// K;
+      getInt128(120000),// K;
+      getInt128(160000)// BT;    
     ]
     )
     console.log("PBCT--", PBCT.toString())
