@@ -190,7 +190,7 @@ describe("Greeter", function () {
 
     let purchaseQuantity = await greeter.getPurchaseQuantity([
       false,// direction;
-      getInt128(2),// bk;
+      getInt128(1.01),// bk;
       getInt128(ltable[0]["delta"]),// delta;
       getInt128(2)// _i;
     ])
@@ -206,8 +206,8 @@ describe("Greeter", function () {
       false,// direction;
       getInt128(ltable[0]["delta"]),// delta,
       getInt128(864000),// t,
-      getInt128(1.01),// BK,
-      getInt128(60600),// K;
+      getInt128(2),// BK,
+      getInt128(120000),// K;
       getInt128(70000)// BT;    
     ]
     )
@@ -222,17 +222,17 @@ describe("Greeter", function () {
 
     let Priceimpact = await greeter.getPriceimpact([
       "28122421235921778630",// rl; up:49149741625773706163 down:28122421235921778630
-      "164153678104966167605393",// pbct; up:164153678104966167605393 down:17463157245209166766
+      "873157862260458338326563",// pbct; up:164153678104966167605393 down:17463157245209166766
       getInt128(2),// Q;
     ]
     )
     console.log("Priceimpact--", Priceimpact.toString())
 
     let LiquidationNum = await greeter.getLiquidationNum([
-      "164153678104966167605393",// pbct; up:164153678104966167605393 down:17463157245209166766
+      "873157862260458338326563",// pbct; up:164153678104966167605393 down:17463157245209166766
       getInt128(2),// Q;
       "28122421235921778630",// rl; up:49149741625773706163 down:28122421235921778630
-      "1093878690942348",// priceimpact; up:1093878690942348 down:11282497226676
+      "2522843075480251",// priceimpact; up:1093878690942348 down:11282497226676
     ])
     console.log("LiquidationNum--", LiquidationNum.toString())
 
