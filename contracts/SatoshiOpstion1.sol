@@ -414,7 +414,7 @@ contract SatoshiOpstion1 is ERC721, Ownable {
 
     // 获取K
     function getBk(int128 bk) public view returns (int128) {
-        int128 k = ABDKMath64x64.div(currBtc, bk);
+        int128 k = ABDKMath64x64.mul(currBtc, bk);
         return k;
     }
 
@@ -486,22 +486,37 @@ contract SatoshiOpstion1 is ERC721, Ownable {
             _getPurchaseQuantityInfo.bk
         );
         int128 _E = getE(_getEInfo);
+        console.log("_E");
+        console.logInt(_E);
         int128 _K = getBk(_getPurchaseQuantityInfo.bk);
+        console.log("_K");
+        console.logInt(_K);
+        int128 omg1;
+        int128 omg2;
 
-        int128 omg1 = ABDKMath64x64.mul(
-            omg,
-            pow64x64(ABDKMath64x64.div(B0, _E), deltaItem.L1)
-        );
-        int128 omg2 = ABDKMath64x64.mul(
-            ABDKMath64x64.sub(1 * 2**64, omg),
-            pow64x64(ABDKMath64x64.div(B0, _E), deltaItem.L2)
-        );
-
-        if (!_getPurchaseQuantityInfo.direction) {
+        if (_getPurchaseQuantityInfo.direction) {
+            omg1 = ABDKMath64x64.mul(
+                omg,
+                pow64x64(ABDKMath64x64.div(B0, _E), deltaItem.L1)
+            );
+            omg2 = ABDKMath64x64.mul(
+                ABDKMath64x64.sub(1 * 2**64, omg),
+                pow64x64(ABDKMath64x64.div(B0, _E), deltaItem.L2)
+            );
+        } else {
+            console.log("B0");
+            console.logInt(B0);
             omg1 = ABDKMath64x64.mul(
                 omg,
                 pow64x64(ABDKMath64x64.div(_E, B0), deltaItem.L3)
             );
+            console.log("omg1");
+            console.logInt(omg1);
+            console.log("L3");
+            console.logInt(deltaItem.L3);
+            console.log("L4");
+            console.logInt(deltaItem.L4);
+            pow64x64(ABDKMath64x64.div(_E, B0), deltaItem.L4);
             omg2 = ABDKMath64x64.mul(
                 ABDKMath64x64.sub(1 * 2**64, omg),
                 pow64x64(ABDKMath64x64.div(_E, B0), deltaItem.L4)
@@ -512,13 +527,17 @@ contract SatoshiOpstion1 is ERC721, Ownable {
         // console.log("omg1-rl");
 
         // console.logInt(_getPurchaseQuantityInfo.bk);
-        // console.log("omg1");
-        // console.logInt(omg1);
-        // console.log("omg2-rl");
-        // console.log("omg2");
+
+        console.log("omg2-rl");
+        console.log("omg2");
         // console.logInt(omg2);
-        // console.log("P0");
-        // console.logInt(ABDKMath64x64.add(omg1, omg2));
+        console.log("P0");
+        console.logInt(
+            ABDKMath64x64.mul(
+                ABDKMath64x64.add(omg1, omg2),
+                ABDKMath64x64.sub(_K, _E)
+            )
+        );
         int128 _Q = ABDKMath64x64.div(
             _getPurchaseQuantityInfo._i,
             ABDKMath64x64.mul(
@@ -651,6 +670,7 @@ contract SatoshiOpstion1 is ERC721, Ownable {
         int128 _E = getE(_getEInfo);
         int128 _Bt = _getPBCTInfo.BT; //to do
 
+        int128 _a = max(0, ABDKMath64x64.sub(_Bt, _getPBCTInfo.K));
         DeltaItem memory _DeltaItem = getDeltaTable(_getPBCTInfo.delta);
         if (_getPBCTInfo.direction) {
             l1Orl3 = _DeltaItem.L1;
@@ -660,8 +680,11 @@ contract SatoshiOpstion1 is ERC721, Ownable {
             l1Orl3 = _DeltaItem.L3;
             l2Orl4 = _DeltaItem.L4;
             omg = getDownOmg(_getPBCTInfo.delta);
+            _a = max(0, ABDKMath64x64.sub(_getPBCTInfo.K, _Bt));
         }
-        int128 _a = max(0, ABDKMath64x64.sub(_getPBCTInfo.K, _Bt));
+        console.log("_a");
+        console.logInt(_a);
+
         int128 _t = ABDKMath64x64.div(_getPBCTInfo.t, SECONDS_IN_A_YEAR);
         int128 _deltaT = ABDKMath64x64.mul(_getPBCTInfo.delta, _t);
         console.log("getPBCT_deltaT");
