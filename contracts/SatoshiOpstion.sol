@@ -406,6 +406,17 @@ contract SatoshiOpstion is ERC721, Ownable {
         int128 k = ABDKMath64x64.div(currBtc, bk);
         return k;
     }
+    // a**b
+    function pow64x64(int128 a, int128 b) public pure returns(int128) {
+        return ABDKMath64x64.exp_2(
+            ABDKMath64x64.mul(
+                b,
+                ABDKMath64x64.log_2(
+                    a
+                )
+            )
+        );
+    }
 
     // 获取开仓算数量
     struct getPurchaseQuantityInfo {
