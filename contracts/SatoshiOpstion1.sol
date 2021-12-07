@@ -453,6 +453,9 @@ contract SatoshiOpstion1 is ERC721, Ownable {
             l2Orl4
         );
         int128 b = ABDKMath64x64.sub(ABDKMath64x64.add(b_1, b_2), 1 * 2**64);
+        if (!_getEInfo.direction) {
+            b = ABDKMath64x64.add(ABDKMath64x64.add(b_1, b_2), 1 * 2**64);
+        }
 
         int128 _e = ABDKMath64x64.div(a, b);
         return _e;
