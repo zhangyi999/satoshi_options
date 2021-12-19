@@ -13,12 +13,16 @@ import "./libraries/ECDSA.sol";
 import "./libraries/SafeToken.sol";
 import "./interface/IConfig.sol";
 
-contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
-
+contract SatoshiOpstion_Charm is
+    ERC721Upgradeable,
+    OwnableUpgradeable,
+    ReentrancyGuardUpgradeable
+{
     using SafeToken for address;
     using ECDSA for bytes32;
 
-    int128 public immutable SECONDS_IN_A_YEAR = ABDKMath64x64.fromUInt(31536000);
+    int128 public immutable SECONDS_IN_A_YEAR =
+        ABDKMath64x64.fromUInt(31536000);
 
     int128 public currBtc;
 
@@ -50,7 +54,7 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
     mapping(uint256 => NftData) private _nftStore;
 
     modifier isMyNFTPid(uint256 _pid) {
-        require(ownerOf(_pid) == msg.sender,"pid No access");
+        require(ownerOf(_pid) == msg.sender, "pid No access");
         _;
     }
 
@@ -65,9 +69,10 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         int128 t;
         int128 BK;
         int128 K;
+        int128 BT;
     }
 
-    event Open(address indexed owner, uint256 indexed pid , uint256 amount);
+    event Open(address indexed owner, uint256 indexed pid, uint256 amount);
     event Cloes(address indexed owner, uint256 indexed pid, uint256 btcPrice);
 
     function initialize(
@@ -96,6 +101,7 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         uint256 nonce;
         bytes signature;
     }
+
     function _checkIdentity(SignedPriceInput calldata signedPr)
         public
         returns (bool success)
@@ -105,7 +111,12 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         uint256 nonce = signedPr.nonce;
         bytes calldata signature = signedPr.signature;
         bytes32 hash = keccak256(
-            abi.encodePacked(signedPr.tradeToken, tradePrice, nonce, DATA_PROVIDER)
+            abi.encodePacked(
+                signedPr.tradeToken,
+                tradePrice,
+                nonce,
+                DATA_PROVIDER
+            )
         );
         bytes32 messageHash = hash.toEthSignedMessageHash();
 
@@ -118,7 +129,6 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         success = true;
         return success;
     }
-
 
     //////////// nft ////////////
     function totalSupply() external view returns (uint256) {
@@ -144,14 +154,23 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
 
     //////////// 64x64 ////////////
     function pow64x64(int128 a, int128 pow) public pure returns (int128) {
-        return ABDKMath64x64.exp_2(ABDKMath64x64.mul(pow, ABDKMath64x64.log_2(a)));
+        return
+            ABDKMath64x64.exp_2(ABDKMath64x64.mul(pow, ABDKMath64x64.log_2(a)));
+    }
+
+    function min(int128 a, int128 b) public pure returns (int128) {
+        return a < b ? a : b;
+    }
+
+    function max(int128 a, int128 b) public pure returns (int128) {
+        return a > b ? a : b;
     }
 
     // 设置当前BTC价格
     function _SetCurrBtcPrice(uint128 _currBtc) internal {
         currBtc = int128(_currBtc);
     }
-    
+
     function getNftInfoFor(uint256 _pid) public view returns (NftData memory) {
         return _nftStore[_pid];
     }
@@ -163,6 +182,7 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         int128 delta;
         int128 _i;
     }
+
     function open(
         bool direction,
         uint128 _delta,
@@ -170,7 +190,6 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         uint128 _cppcNum,
         SignedPriceInput calldata signedPr
     ) public checkIdentity(signedPr) returns (uint256 pid) {
-
         int128 delta = int128(_delta);
         int128 bk = int128(_bk);
         int128 cppcNum = int128(_cppcNum);
@@ -208,7 +227,6 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         return pid;
     }
 
-    
     // 通过Delta获取配置
     function getDeltaTable(int128 _delta)
         public
@@ -249,6 +267,48 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         return ABDKMath64x64.mul(currBtc, bk);
     }
 
+    struct GetEInfo {
+        bool direction;
+        int128 delta;
+        int128 bk;
+    }
+
+    // 获取E
+    function getE(GetEInfo memory _getEInfo) public view returns (int128) {
+        int128 l1Orl3;
+        int128 l2Orl4;
+        int128 omg;
+        IConfig.DeltaItem memory _DeltaItem = getDeltaTable(_getEInfo.delta);
+        if (_getEInfo.direction) {
+            l1Orl3 = _DeltaItem.L1;
+            l2Orl4 = _DeltaItem.L2;
+            omg = getUpOmg(_getEInfo.delta);
+        } else {
+            l1Orl3 = _DeltaItem.L3;
+            l2Orl4 = _DeltaItem.L4;
+            omg = getDownOmg(_getEInfo.delta);
+        }
+        int128 K = getBk(_getEInfo.bk);
+        int128 a_1 = ABDKMath64x64.mul(omg, l1Orl3);
+        int128 a_2 = ABDKMath64x64.mul(
+            ABDKMath64x64.sub(1 * 2**64, omg),
+            l2Orl4
+        );
+        int128 a = ABDKMath64x64.mul(ABDKMath64x64.add(a_1, a_2), K);
+
+        int128 b_1 = ABDKMath64x64.mul(omg, l1Orl3);
+        int128 b_2 = ABDKMath64x64.mul(
+            ABDKMath64x64.sub(1 * 2**64, omg),
+            l2Orl4
+        );
+        int128 b = ABDKMath64x64.sub(ABDKMath64x64.add(b_1, b_2), 1 * 2**64);
+        if (!_getEInfo.direction) {
+            b = ABDKMath64x64.add(ABDKMath64x64.add(b_1, b_2), 1 * 2**64);
+        }
+        int128 _e = ABDKMath64x64.div(a, b);
+        return _e;
+    }
+
     function getPurchaseQuantity(
         GetPurchaseQuantityInfo memory _getPurchaseQuantityInfo
     ) public view returns (int128) {
@@ -256,34 +316,57 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
             _getPurchaseQuantityInfo.delta
         );
         int128 delta = _getPurchaseQuantityInfo.delta;
+        int128 B0 = currBtc;
         int128 omg = getUpOmg(delta);
         if (!_getPurchaseQuantityInfo.direction) {
             omg = getDownOmg(delta);
         }
-
-        int128 omg1 = ABDKMath64x64.div(
-            omg,
-            pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L1)
+        GetEInfo memory _getEInfo = GetEInfo(
+            _getPurchaseQuantityInfo.direction,
+            _getPurchaseQuantityInfo.delta,
+            _getPurchaseQuantityInfo.bk
         );
-        int128 omg2 = ABDKMath64x64.div(
-            ABDKMath64x64.sub(1 * 2**64, omg),
-            pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L2)
-        );
+        int128 _E = getE(_getEInfo);
+        int128 _K = getBk(_getPurchaseQuantityInfo.bk);
+        int128 omg1;
+        int128 omg2;
 
-        if (!_getPurchaseQuantityInfo.direction) {
-            omg1 = ABDKMath64x64.div(
+        if (_getPurchaseQuantityInfo.direction) {
+            omg1 = ABDKMath64x64.mul(
                 omg,
-                pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L3)
+                pow64x64(ABDKMath64x64.div(B0, _E), deltaItem.L1)
             );
-            omg2 = ABDKMath64x64.div(
+            omg2 = ABDKMath64x64.mul(
                 ABDKMath64x64.sub(1 * 2**64, omg),
-                pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L4)
+                pow64x64(ABDKMath64x64.div(B0, _E), deltaItem.L2)
+            );
+        } else {
+            omg1 = ABDKMath64x64.mul(
+                omg,
+                pow64x64(ABDKMath64x64.div(_E, B0), deltaItem.L3)
+            );
+            pow64x64(ABDKMath64x64.div(_E, B0), deltaItem.L4);
+            omg2 = ABDKMath64x64.mul(
+                ABDKMath64x64.sub(1 * 2**64, omg),
+                pow64x64(ABDKMath64x64.div(_E, B0), deltaItem.L4)
             );
         }
         int128 _Q = ABDKMath64x64.div(
             _getPurchaseQuantityInfo._i,
-            ABDKMath64x64.add(omg1, omg2)
+            ABDKMath64x64.mul(
+                ABDKMath64x64.add(omg1, omg2),
+                ABDKMath64x64.sub(_E, _K)
+            )
         );
+        if (!_getPurchaseQuantityInfo.direction) {
+            _Q = ABDKMath64x64.div(
+                _getPurchaseQuantityInfo._i,
+                ABDKMath64x64.mul(
+                    ABDKMath64x64.add(omg1, omg2),
+                    ABDKMath64x64.sub(_K, _E)
+                )
+            );
+        }
         return _Q;
     }
 
@@ -299,19 +382,20 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         nftData.isEnable = false;
         bool direction = nftData.direction;
         int128 delta = nftData.delta;
-        
         int128 bk = nftData.bk;
         int128 cppcNum = nftData.cppcNum;
         int128 K = nftData.K;
+        int128 BT = currBtc;
         GetPBCTInfo memory _getPBCTInfo = GetPBCTInfo(
             direction,
             bk,
             delta,
             cppcNum,
-            K
+            K,
+            BT
         );
         int128 pbct = getPBCT(_getPBCTInfo);
-        
+
         GetRlInfo memory _GetRlInfo = GetRlInfo(direction, delta);
         int128 rl = getRL(_GetRlInfo);
 
@@ -321,12 +405,13 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
             cppcNum
         );
         int128 priceimpact = getPriceimpact(_GetPriceimpactInfo);
-        GetLiquidationNumInfo memory _getLiquidationNumInfo = GetLiquidationNumInfo(
-            pbct,
-            cppcNum,
-            rl,
-            priceimpact
-        );
+        GetLiquidationNumInfo
+            memory _getLiquidationNumInfo = GetLiquidationNumInfo(
+                pbct,
+                cppcNum,
+                rl,
+                priceimpact
+            );
         int128 LiquidationNum = getLiquidationNum(_getLiquidationNumInfo);
         _mintCppc(_msgSender(), ABDKMath64x64.mulu(LiquidationNum, 1));
     }
@@ -334,7 +419,11 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
     function downLiquidation() private view returns (int128) {}
 
     //  获取TB
-    function getTB(bool direction, int128 K) public view returns (int128 _TB_int128) {
+    function getTB(bool direction, int128 K)
+        public
+        view
+        returns (int128 _TB_int128)
+    {
         uint256 B_uint256 = ABDKMath64x64.mulu(currBtc, 1);
         uint256 K_uint256 = ABDKMath64x64.mulu(K, 1);
         if (direction) {
@@ -357,6 +446,9 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         int128 l2Orl4;
         int128 omg;
         IConfig.DeltaItem memory _DeltaItem = getDeltaTable(_getPBCTInfo.delta);
+        int128 _Bt = _getPBCTInfo.BT;
+
+        int128 _a = max(0, ABDKMath64x64.sub(_Bt, _getPBCTInfo.K));
         if (_getPBCTInfo.direction) {
             l1Orl3 = _DeltaItem.L1;
             l2Orl4 = _DeltaItem.L2;
@@ -365,25 +457,9 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
             l1Orl3 = _DeltaItem.L3;
             l2Orl4 = _DeltaItem.L4;
             omg = getDownOmg(_getPBCTInfo.delta);
-        }
-        int128 _tb = getTB(_getPBCTInfo.direction, _getPBCTInfo.K);
-        int128 _a1 = ABDKMath64x64.div(_tb, _getPBCTInfo.K);
-        int128 _a1_l1 = pow64x64(_a1, l1Orl3);
-        int128 _a1_w_l1 = ABDKMath64x64.mul(omg, _a1_l1);
-        int128 _a2_l2 = pow64x64(_a1, l2Orl4);
-        int128 _a2_w_l2 = ABDKMath64x64.mul(
-            ABDKMath64x64.sub(1 * 2**64, omg),
-            _a2_l2
-        );
-        if (!_getPBCTInfo.direction) {
-            _a1_w_l1 = ABDKMath64x64.div(omg, _a1_l1);
-            _a2_w_l2 = ABDKMath64x64.div(
-                ABDKMath64x64.sub(1 * 2**64, omg),
-                _a2_l2
-            );
+            _a = max(0, ABDKMath64x64.sub(_getPBCTInfo.K, _Bt));
         }
 
-        int128 _a = ABDKMath64x64.add(_a1_w_l1, _a2_w_l2);
         int128 _t = ABDKMath64x64.div(_getPBCTInfo.t, SECONDS_IN_A_YEAR);
         int128 _deltaT = ABDKMath64x64.mul(_getPBCTInfo.delta, _t);
         int128 _b = ABDKMath64x64.exp(_deltaT);
@@ -395,6 +471,7 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         bool direction;
         int128 delta;
     }
+
     function getRL(GetRlInfo memory _getRlInfo) public view returns (int128) {
         int128 l1Orl3;
         int128 l2Orl4;
@@ -413,69 +490,12 @@ contract SatoshiOpstion_Charm is ERC721Upgradeable, OwnableUpgradeable, Reentran
         return _rl;
     }
 
-    // 获取RL
-    struct GetRlInfo1 {
-        bool direction;
-        int128 delta;
-        int128 BK;
-        int128 K;
-    }
-    function getRL1(GetRlInfo1 memory _getRlInfo) public view returns (int128) {
-        int128 l1Orl3;
-        int128 l2Orl4;
-        int128 omg;
-        IConfig.DeltaItem memory _DeltaItem = getDeltaTable(_getRlInfo.delta);
-        if (_getRlInfo.direction) {
-            l1Orl3 = _DeltaItem.L1;
-            l2Orl4 = _DeltaItem.L2;
-            omg = getUpOmg(_getRlInfo.delta);
-        } else {
-            l1Orl3 = _DeltaItem.L3;
-            l2Orl4 = _DeltaItem.L4;
-            omg = getDownOmg(_getRlInfo.delta);
-        }
-
-        int128 _tb = getTB(true, _getRlInfo.K);
-
-        int128 _a1_l1 = ABDKMath64x64.pow(
-            ABDKMath64x64.div(_tb, _getRlInfo.K),
-            ABDKMath64x64.mulu(l1Orl3, 1)
-        );
-        int128 _a1 = ABDKMath64x64.mul(ABDKMath64x64.mul(l1Orl3, omg), _a1_l1);
-
-        int128 _a2_l2 = ABDKMath64x64.pow(
-            ABDKMath64x64.div(_tb, _getRlInfo.K),
-            ABDKMath64x64.mulu(l2Orl4, 1)
-        );
-        int128 _a2 = ABDKMath64x64.mul(
-            ABDKMath64x64.mul(l2Orl4, ABDKMath64x64.sub(1 * 2**64, omg)),
-            _a2_l2
-        );
-        int128 _b1 = ABDKMath64x64.mul(omg, _a1_l1);
-        int128 _b2 = ABDKMath64x64.mul(
-            ABDKMath64x64.sub(1 * 2**64, omg),
-            _a2_l2
-        );
-        if (!_getRlInfo.direction) {
-            _a1 = ABDKMath64x64.div(ABDKMath64x64.mul(l1Orl3, omg), _a1_l1);
-            _a2 = ABDKMath64x64.div(
-                ABDKMath64x64.mul(l2Orl4, ABDKMath64x64.sub(1 * 2**64, omg)),
-                _a2_l2
-            );
-            _b1 = ABDKMath64x64.div(omg, _a1_l1);
-            _b2 = ABDKMath64x64.div(ABDKMath64x64.sub(1 * 2**64, omg), _a2_l2);
-        }
-        int128 _a = ABDKMath64x64.add(_a1, _a2);
-        int128 _b = ABDKMath64x64.add(_b1, _b2);
-        int128 _rl = ABDKMath64x64.div(_a, _b);
-        return _rl;
-    }
-
     struct GetPriceimpactInfo {
         int128 rl;
         int128 pbct;
         int128 Q;
     }
+
     function getPriceimpact(GetPriceimpactInfo memory _GetPriceimpactInfo)
         public
         view
