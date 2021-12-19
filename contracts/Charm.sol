@@ -36,7 +36,7 @@ contract MinterAccess is AccessControl, Ownable {
     }
 }
 
-contract Charm is ERC20("Charm", "Charm"), MinterAccess {
+contract Charm is ERC20("Charm Derivatives Platform Token", "CHARM"), MinterAccess {
     function mint(address _to, uint256 _amount) external onlyMinter {
         super._mint(_to, _amount);
     }
