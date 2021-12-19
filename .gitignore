@@ -11,3 +11,8 @@ cache
 artifacts
 
 test/formula_test.ts
+
+contracts/.DS_Store
+options1.xlsx
+test/formula-test.ts
+yarn.lock
