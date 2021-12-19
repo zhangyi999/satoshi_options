@@ -3,7 +3,16 @@ node_modules
 coverage
 coverage.json
 typechain
+.gitignore
+
 
 #Hardhat files
 cache
 artifacts
+
+test/formula_test.ts
+
+contracts/.DS_Store
+options1.xlsx
+test/formula-test.ts
+yarn.lock
