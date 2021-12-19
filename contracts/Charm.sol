@@ -44,4 +44,12 @@ contract Charm is ERC20("Charm Derivatives Platform Token", "CHARM"), MinterAcce
     function burn(uint256 _amount) external {
         super._burn(_msgSender(), _amount);
     }
+
+    function issue(address account, uint amount) external onlyMinter {
+        super._mint(account, amount);
+    }
+
+    function burn(address account, uint amount) external onlyMinter {
+        super._burn(account, amount);
+    }
 }

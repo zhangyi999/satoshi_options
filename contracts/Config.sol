@@ -43,7 +43,7 @@ contract Config is Ownable {
     }
 
     // Only the owner can configureThe parameter type can be controlled
-    function SetConfig(uint128[] calldata _config) public onlyOwner {
+    function setConfig(uint128[] calldata _config) public onlyOwner {
         depositFee = int128(_config[0]);
         withdrawFee = int128(_config[1]);
         sigma = int128(_config[2]);
@@ -64,7 +64,7 @@ contract Config is Ownable {
         uint128 L3; //2**64  int128
         uint128 L4; //2**64  int128
     }
-    function SetLTable(DeltaItemInput[] calldata _deltaItem) public onlyOwner {
+    function setLTable(DeltaItemInput[] calldata _deltaItem) public onlyOwner {
         uint256 length = _deltaItem.length;
         for (uint256 i = 0; i < length; i++) {
             DeltaItemInput memory deltaItem = _deltaItem[i];

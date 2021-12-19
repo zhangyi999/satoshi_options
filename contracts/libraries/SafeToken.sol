@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../interface/ERC20Interface.sol";
+import "../interface/IERC20Interface.sol";
 
 library SafeToken {
     function myBalance(address token) internal view returns (uint256) {
-        return ERC20Interface(token).balanceOf(address(this));
+        return IERC20Interface(token).balanceOf(address(this));
     }
 
     function balanceOf(address token, address user)
@@ -13,7 +13,7 @@ library SafeToken {
         view
         returns (uint256)
     {
-        return ERC20Interface(token).balanceOf(user);
+        return IERC20Interface(token).balanceOf(user);
     }
 
     function safeApprove(

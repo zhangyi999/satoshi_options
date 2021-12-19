@@ -13,7 +13,7 @@ import "./libraries/ECDSA.sol";
 import "./libraries/SafeToken.sol";
 import "./interface/IConfig.sol";
 
-contract SatoshiOpstion_Charm is
+contract SatoshiOpstion_Charm_Two is
     ERC721Upgradeable,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable
@@ -215,6 +215,7 @@ contract SatoshiOpstion_Charm is
         nftData.K = K;
         nftData.isEnable = true;
         _burnFor(_msgSender(), ABDKMath64x64.mulu(cppcNum, 1));
+        emit Open(_msgSender(), pid, signedPr.tradePrice);
         return pid;
     }
 
@@ -297,7 +298,7 @@ contract SatoshiOpstion_Charm is
     }
 
     // 平仓
-    function Withdraw(uint256 _pid, SignedPriceInput calldata signedPr)
+    function close(uint256 _pid, SignedPriceInput calldata signedPr)
         public
         payable
         isMyNFTPid(_pid)
@@ -339,6 +340,7 @@ contract SatoshiOpstion_Charm is
             );
         int128 LiquidationNum = getLiquidationNum(_getLiquidationNumInfo);
         _mintCppc(_msgSender(), ABDKMath64x64.mulu(LiquidationNum, 1));
+        emit Cloes(_msgSender(), _pid, signedPr.tradePrice);
     }
 
     function downLiquidation() private view returns (int128) {}
@@ -558,11 +560,11 @@ contract SatoshiOpstion_Charm is
     }
 
     function _mintCppc(address to, uint256 amount) internal {
-        ERC20Interface(charm).mint(to, amount);
+        IERC20Interface(charm).issue(to, amount);
     }
 
     function _burnFor(address from, uint256 amount) internal {
         charm.safeTransferFrom(from, address(this), amount);
-        ERC20Interface(charm).burn(amount);
+        IERC20Interface(charm).burn(amount);
     }
 }
