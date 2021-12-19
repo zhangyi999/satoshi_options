@@ -372,19 +372,22 @@ contract SatoshiOpstion_Charm is
     }
 
     // 平仓
-    function close(uint256 _pid, SignedPriceInput calldata signedPr)
+    function close(uint256 _pid, uint128 _cAmount, SignedPriceInput calldata signedPr)
         public
         payable
         isMyNFTPid(_pid)
         checkIdentity(signedPr)
     {
         _SetCurrBtcPrice(signedPr.tradePrice);
-        NftData memory nftData = getNftInfoFor(_pid);
+        NftData storage nftData = _nftStore[_pid];
         nftData.isEnable = false;
         bool direction = nftData.direction;
         int128 delta = nftData.delta;
         int128 bk = nftData.bk;
-        int128 cppcNum = nftData.cppcNum;
+        int128 cppcNum = int128(_cAmount);
+
+        nftData.cppcNum -= cppcNum;
+        
         int128 K = nftData.K;
         int128 BT = currBtc;
         GetPBCTInfo memory _getPBCTInfo = GetPBCTInfo(
