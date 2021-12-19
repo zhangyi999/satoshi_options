@@ -513,7 +513,7 @@ contract SatoshiOpstion1 is ERC721, Ownable {
             console.log("omg1");
             console.logInt(omg1);
             console.log("L3");
-            console.logInt(deltaItem.L3);
+            console.logInt(ABDKMath64x64.div(_E, B0));
             console.log("L4");
             console.logInt(deltaItem.L4);
             pow64x64(ABDKMath64x64.div(_E, B0), deltaItem.L4);
