@@ -36,7 +36,7 @@ contract MinterAccess is AccessControl, Ownable {
     }
 }
 
-contract Cppc is ERC20("Cppc", "Cppc"), MinterAccess {
+contract Charm is ERC20("Charm", "Charm"), MinterAccess {
     function mint(address _to, uint256 _amount) external onlyMinter {
         super._mint(_to, _amount);
     }
