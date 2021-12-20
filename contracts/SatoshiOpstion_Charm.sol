@@ -195,7 +195,8 @@ contract SatoshiOpstion_Charm is
             config.eta2(),
             config.phi(),
             config.withdrawFee(),
-            config.r()
+            config.r(),
+            int128(_cAmount)
         );
 
         _burnNft(_msgSender(), _pid, _cAmount);
