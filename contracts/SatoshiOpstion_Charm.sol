@@ -54,7 +54,7 @@ contract SatoshiOpstion_Charm is
     }
 
     event Open(address indexed owner, uint256 indexed pid, uint256 btcPrice);
-    event Cloes(address indexed owner, uint256 indexed pid, uint256 btcPrice);
+    event Cloes(address indexed owner, uint256 indexed pid, uint256 btcPrice, uint256 closeAmount);
 
     function initialize(
         string memory uri_,
@@ -125,20 +125,20 @@ contract SatoshiOpstion_Charm is
         uint128 _cppcNum,
         SignedPriceInput calldata signedPr
     ) public checkIdentity(signedPr) returns (uint256 pid) {
-        int128 delta = int128(_delta);
-        int128 bk = int128(_bk);
-        int128 cppcNum = int128(_cppcNum);
+        // int128 delta = int128(_delta);
+        // int128 bk = int128(_bk);
+        // int128 cppcNum = int128(_cppcNum);
         int128 tradePrice = int128(signedPr.tradePrice);
-        int128 K = LinearOption.getBk(tradePrice, bk);
+        int128 K = LinearOption.getBk(tradePrice, int128(_bk));
         
         int128 _pbc = LinearOption.getPurchaseQuantity(
             LinearOption.GetPurchaseQuantityInfo(
                 direction,
-                bk,
-                delta,
-                cppcNum
+                int128(_bk),
+                int128(_delta),
+                int128(_cppcNum)
             ),
-            getDeltaTable(delta),
+            getDeltaTable(int128(_delta)),
             config.eta1(),
             config.eta2(),
             tradePrice
@@ -147,14 +147,14 @@ contract SatoshiOpstion_Charm is
         // pbc int128 64*64
         pid = _mintNft(_msgSender(), uint128(_pbc));
         NftData storage nftData = _nftStore[pid];
-        nftData.delta = delta;
+        nftData.delta = int128(_delta);
         nftData.direction = direction;
         nftData.createTime = block.timestamp;
         nftData.openPrice = tradePrice;
-        nftData.bk = bk;
+        nftData.bk = int128(_bk);
         nftData.K = K;
 
-        _burnFor(_msgSender(), uint128(cppcNum / (1 <<64)));
+        _burnFor(_msgSender(), _cppcNum / (1 <<64));
         emit Open(_msgSender(), pid, signedPr.tradePrice);
         return pid;
     }
@@ -178,23 +178,16 @@ contract SatoshiOpstion_Charm is
         checkIdentity(signedPr)
     {
         NftData storage nftData = _nftStore[_pid];
-        bool direction = nftData.direction;
-        int128 delta = nftData.delta;
-        int128 bk = nftData.bk;
-        int128 cppcNum = int128(_cAmount);
-        
-        int128 K = nftData.K;
-        int128 BT = int128(signedPr.tradePrice);
         int128 LiquidationNum = LinearOption.getLiquidationNum(
             LinearOption.GetPBCTInfo(
-                direction,
-                delta,
+                nftData.direction,
+                nftData.delta,
                 int128(uint128(block.timestamp << 64)),
-                bk,
-                K,
-                BT
+                nftData.bk,
+                nftData.K,
+                int128(signedPr.tradePrice)
             ),
-            getDeltaTable(delta),
+            getDeltaTable(nftData.delta),
             config.eta1(),
             config.eta2(),
             config.phi(),
@@ -204,7 +197,7 @@ contract SatoshiOpstion_Charm is
 
         _burnNft(_msgSender(), _pid, _cAmount);
         _mintCppc(_msgSender(), uint128(LiquidationNum / (1 <<64)));
-        emit Cloes(_msgSender(), _pid, signedPr.tradePrice);
+        emit Cloes(_msgSender(), _pid, signedPr.tradePrice, _cAmount);
     }
     
     function _mintNft(address _to, uint256 _amount) internal returns (uint256) {
