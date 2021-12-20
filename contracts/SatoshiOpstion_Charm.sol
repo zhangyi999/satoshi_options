@@ -15,6 +15,8 @@ import "./interface/IConfig.sol";
 
 import "./public/LinearOption.sol";
 
+// import "hardhat/console.sol";
+
 contract SatoshiOpstion_Charm is
     ERC1155Upgradeable,
     OwnableUpgradeable,
@@ -157,7 +159,6 @@ contract SatoshiOpstion_Charm is
         nftData.openPrice = tradePrice;
         nftData.bk = int128(_bk);
         nftData.K = K;
-
         _burnFor(_msgSender(), _cppcNum / (1 << 64));
         emit Open(_msgSender(), pid, signedPr.tradePrice);
         return pid;

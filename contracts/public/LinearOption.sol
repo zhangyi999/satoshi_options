@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../interface/IConfig.sol";
 
+// import "hardhat/console.sol";
+
 library LinearOption {
     using ABDKMath64x64 for int128;
 
@@ -92,9 +94,10 @@ library LinearOption {
         int128 a_1 = omg.mul(l1Orl3);
         int128 a_2 = l2Orl4.mul(_int.sub(omg));
         int128 a = K.mul(a_1.add(a_2));
-        int128 b = _getEInfo.direction
-            ? a_1.add(a_2).add(_int)
-            : a_1.add(a_2).sub(_int);
+        int128 b = a_1.add(a_2);
+        b = _getEInfo.direction
+            ? b.add(_int)
+            : b.sub(_int);
         int128 _e = a.div(b);
         return _e;
     }
@@ -110,6 +113,7 @@ library LinearOption {
         int128 omg = _getPurchaseQuantityInfo.direction
             ? getUpOmg(eta1, deltaItem.L1, deltaItem.L2)
             : getDownOmg(eta2, deltaItem.L3, deltaItem.L4);
+        
         int128 _E = getE(
             GetEInfo(
                 _getPurchaseQuantityInfo.direction,
@@ -121,10 +125,10 @@ library LinearOption {
             eta2,
             B0
         );
+        
         int128 _K = getBk(currBtc, _getPurchaseQuantityInfo.bk);
         int128 omg1;
         int128 omg2;
-
         if (_getPurchaseQuantityInfo.direction) {
             omg1 = omg.mul(pow64x64(B0.div(_E), deltaItem.L1));
             omg2 = (int128(1 << 64).sub(omg)).mul(
@@ -136,11 +140,12 @@ library LinearOption {
                 pow64x64(_E.div(B0), deltaItem.L4)
             );
         }
-
-        int128 _Q = _getPurchaseQuantityInfo.direction
-            ? _getPurchaseQuantityInfo._i.div((omg1.add(omg2)).mul(_K.sub(_E)))
-            : _getPurchaseQuantityInfo._i.div((omg1.add(omg2)).mul(_E.sub(_K)));
-
+        
+        int128 _Q = _getPurchaseQuantityInfo._i.div(omg1.add(omg2));
+        
+        _Q = _getPurchaseQuantityInfo.direction
+            ? _Q.mul(_K.sub(_E))
+            : _Q.mul(_E.sub(_K));
         return _Q;
     }
 

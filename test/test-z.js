@@ -24,7 +24,8 @@ function getInt128(num) {
     // console.log("_num", _num);
     return _num
 }
-const MAX_UINT256 = ethers.BigNumber.from(2).pow(256).sub(1)
+const MAX_UINT256 = '0x'+'f'.repeat(64)
+const DECIMALS_HEX = '0X' + (1e18).toString(16)
 
 const currBtc = 60000;
 const depositFee = 0.01;
@@ -65,6 +66,10 @@ const ltable = [
 // show string
 function getNumForBig(big) {
     if ( big instanceof BigNumber ) {
+        return big.toString(10)
+    }
+
+    if ( big instanceof BN ) {
         return big.toString()
     }
 
@@ -110,7 +115,7 @@ let config;
 let SatoshiOpstion_Charm;
 let charm_token;
 describe("SatoshiOpstion_Charm", function () {
-    beforeEach("set up the contracts", async function () {
+    before("set up the contracts", async function () {
         //////// config ////////
         config = await ethers.getContractFactory("contracts/Config.sol:Config");
         config = await config.deploy();
@@ -166,6 +171,10 @@ describe("SatoshiOpstion_Charm", function () {
         console.log("set siger hash: ",tx.hash)
         await tx.wait()
 
+        //////// set burn ////////
+        tx = await charm_token.setupMinterRole(SatoshiOpstion_Charm.address)
+        await tx.wait()
+
     });
 
     // it("config", async function () {
@@ -180,9 +189,12 @@ describe("SatoshiOpstion_Charm", function () {
 
     it("mint charm", async function() {
         let [owner, alice, bob] = await ethers.getSigners()
-        const mintAmount = BN.from(100000).mul('0x' + (1e18))
+        const mintAmount = BN.from(1000000).mul(DECIMALS_HEX)
+        // const mintAmount = getNumForBig(new BigNumber(1000000).multipliedBy(DECIMALS_HEX))
+        
         let tx = await charm_token.mint(owner.address, mintAmount)
         await tx.wait()
+        
         tx = await charm_token.mint(alice.address, mintAmount)
         await tx.wait()
         tx = await charm_token.mint(bob.address, mintAmount)
@@ -206,6 +218,13 @@ describe("SatoshiOpstion_Charm", function () {
 
     it("owner open", async function () {
         let [owner] = await ethers.getSigners()
+
+        console.log(
+            charm_token.address,
+            owner.address,
+            'owner balance:',
+            getNumForBig(await charm_token.balanceOf(owner.address))
+        )
 
         let tx;
 
@@ -233,7 +252,50 @@ describe("SatoshiOpstion_Charm", function () {
         )
         await tx.wait()
 
+        let balanceNFT = await SatoshiOpstion_Charm.balanceOf(owner.address, 0)
+        console.log(
+            "nft balance: ",
+            getNumForBig(balanceNFT)
+        )
+        
     });
+
+    it("close", async () => {
+        let [owner] = await ethers.getSigners()
+        const tokenAddress = charm_token.address
+        const tradePrice = '2'
+        const {
+            nonce,
+            signature
+        } = getPriceData(tokenAddress, tradePrice)
+        let balanceNFT = await SatoshiOpstion_Charm.balanceOf(owner.address, 0)
+        console.log(
+            "nft balance: ",
+            getNumForBig(balanceNFT)
+        )
+        tx = await SatoshiOpstion_Charm.close(
+            0,
+            balanceNFT,
+            [
+                tokenAddress,
+                tradePrice,
+                nonce,
+                signature
+            ]
+        )
+        await tx.wait()
+        balanceNFT = await SatoshiOpstion_Charm.balanceOf(owner.address, 0)
+        console.log(
+            "closed nft balance: ",
+            getNumForBig(balanceNFT)
+        )
+
+        let balance = await charm_token.balanceOf(owner.address)
+        console.log(
+            "closed charm balance: ",
+            getNumForBig(balance)
+        )
+    })
 
 
 });
