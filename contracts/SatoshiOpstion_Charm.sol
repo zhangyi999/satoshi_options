@@ -54,7 +54,12 @@ contract SatoshiOpstion_Charm is
     }
 
     event Open(address indexed owner, uint256 indexed pid, uint256 btcPrice);
-    event Cloes(address indexed owner, uint256 indexed pid, uint256 btcPrice, uint256 closeAmount);
+    event Cloes(
+        address indexed owner,
+        uint256 indexed pid,
+        uint256 btcPrice,
+        uint256 closeAmount
+    );
 
     function initialize(
         string memory uri_,
@@ -81,6 +86,7 @@ contract SatoshiOpstion_Charm is
         uint256 nonce;
         bytes signature;
     }
+
     function _checkIdentity(SignedPriceInput calldata signedPr)
         public
         returns (bool success)
@@ -130,7 +136,7 @@ contract SatoshiOpstion_Charm is
         // int128 cppcNum = int128(_cppcNum);
         int128 tradePrice = int128(signedPr.tradePrice);
         int128 K = LinearOption.getBk(tradePrice, int128(_bk));
-        
+
         int128 _pbc = LinearOption.getPurchaseQuantity(
             LinearOption.GetPurchaseQuantityInfo(
                 direction,
@@ -154,7 +160,7 @@ contract SatoshiOpstion_Charm is
         nftData.bk = int128(_bk);
         nftData.K = K;
 
-        _burnFor(_msgSender(), _cppcNum / (1 <<64));
+        _burnFor(_msgSender(), _cppcNum / (1 << 64));
         emit Open(_msgSender(), pid, signedPr.tradePrice);
         return pid;
     }
@@ -167,22 +173,19 @@ contract SatoshiOpstion_Charm is
     {
         return config.delta(_delta);
     }
+
     // 平仓
     function close(
         uint256 _pid,
         uint128 _cAmount,
         SignedPriceInput calldata signedPr
-    )
-        public
-        payable
-        checkIdentity(signedPr)
-    {
+    ) public payable checkIdentity(signedPr) {
         NftData storage nftData = _nftStore[_pid];
         int128 LiquidationNum = LinearOption.getLiquidationNum(
             LinearOption.GetPBCTInfo(
                 nftData.direction,
                 nftData.delta,
-                int128(uint128(block.timestamp << 64)),
+                int128(uint128((block.timestamp - nftData.createTime) << 64)),
                 nftData.bk,
                 nftData.K,
                 int128(signedPr.tradePrice)
@@ -196,17 +199,21 @@ contract SatoshiOpstion_Charm is
         );
 
         _burnNft(_msgSender(), _pid, _cAmount);
-        _mintCppc(_msgSender(), uint128(LiquidationNum / (1 <<64)));
+        _mintCppc(_msgSender(), uint128(LiquidationNum / (1 << 64)));
         emit Cloes(_msgSender(), _pid, signedPr.tradePrice, _cAmount);
     }
-    
+
     function _mintNft(address _to, uint256 _amount) internal returns (uint256) {
         _mint(_to, _totalSupply, _amount, "");
         return _totalSupply++;
     }
 
-    function _burnNft(address from, uint256 id, uint256 amount) internal {
-        _burn(from, id,  amount);
+    function _burnNft(
+        address from,
+        uint256 id,
+        uint256 amount
+    ) internal {
+        _burn(from, id, amount);
     }
 
     function _mintCppc(address to, uint256 amount) internal {
