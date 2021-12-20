@@ -34,7 +34,7 @@ contract SatoshiOpstion_Charm is
     address public DATA_PROVIDER;
 
     //////////// nft ////////////
-    uint256 private _totalSupply = 0;
+    uint256 private _totalSupply;
     // user => [ids]
     mapping(address => uint256[]) private _idBalance;
 
@@ -48,8 +48,8 @@ contract SatoshiOpstion_Charm is
     }
     mapping(uint256 => NftData) private _nftStore;
 
-    modifier checkIdentity(SignedPriceInput calldata signedPr) {
-        require(_checkIdentity(signedPr), "Price Error.");
+    modifier onlySigner(SignedPriceInput calldata signedPr) {
+        require(checkIdentity(signedPr), "Price Error.");
         _;
     }
 
@@ -85,9 +85,9 @@ contract SatoshiOpstion_Charm is
         uint128 tradePrice;
         uint256 nonce;
         bytes signature;
-    }
+    } 
 
-    function _checkIdentity(SignedPriceInput calldata signedPr)
+    function checkIdentity(SignedPriceInput calldata signedPr)
         public
         returns (bool success)
     {
@@ -107,8 +107,8 @@ contract SatoshiOpstion_Charm is
 
         // Verify that the message's signer is the data provider
         address signer = messageHash.recover(signature);
-        require(signer == DATA_PROVIDER, "CBBC: INVALID_SIGNER.");
-        require(!seenNonces[signer][nonce], "CBBC: USED_NONCE");
+        require(signer == DATA_PROVIDER, "INVALID_SIGNER.");
+        require(!seenNonces[signer][nonce], "USED_NONCE");
         seenNonces[signer][nonce] = true;
 
         success = true;
@@ -130,10 +130,8 @@ contract SatoshiOpstion_Charm is
         uint128 _bk,
         uint128 _cppcNum,
         SignedPriceInput calldata signedPr
-    ) public checkIdentity(signedPr) returns (uint256 pid) {
-        // int128 delta = int128(_delta);
-        // int128 bk = int128(_bk);
-        // int128 cppcNum = int128(_cppcNum);
+    ) public onlySigner(signedPr) returns (uint256 pid) {
+
         int128 tradePrice = int128(signedPr.tradePrice);
         int128 K = LinearOption.getBk(tradePrice, int128(_bk));
 
@@ -169,7 +167,7 @@ contract SatoshiOpstion_Charm is
     function getDeltaTable(int128 _delta)
         public
         view
-        returns (IConfig.DeltaItem memory _DeltaItem)
+        returns (IConfig.DeltaItem memory)
     {
         return config.delta(_delta);
     }
@@ -179,7 +177,7 @@ contract SatoshiOpstion_Charm is
         uint256 _pid,
         uint128 _cAmount,
         SignedPriceInput calldata signedPr
-    ) public payable checkIdentity(signedPr) {
+    ) public payable onlySigner(signedPr) {
         NftData storage nftData = _nftStore[_pid];
         int128 LiquidationNum = LinearOption.getLiquidationNum(
             LinearOption.GetPBCTInfo(

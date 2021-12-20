@@ -44,6 +44,16 @@ module.exports = {
       accounts: [
         ...kovan,
       ]
+    },
+    hecoTest: {
+      url: "https://http-testnet.huobichain.com",
+      accounts: [
+        "7d0b3663b9143cb4f36053b8fe001c62985852159cad3b3d0d18aa68f3c57727", // 0xC8C3dD114E4cAa70a313Aa1022151F1C3172bEcc
+        "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
+        "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356",
+        "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97",
+        
+      ],
     }
   }
 };

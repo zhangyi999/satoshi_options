@@ -5,24 +5,23 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Config is Ownable {
     // 开仓费率
-    int128 depositFee;
+    int128 public depositFee;
     // 平仓费率
-    int128 withdrawFee;
+    int128 public withdrawFee;
 
-    int128 sigma; // 大写Σ，小写σ
-    int128 lambda; // λ
-    int128 eta1; // η1
-    int128 eta2; //η2
-    int128 _p; //
-    int128 _q; //
+    int128 public sigma; // 大写Σ，小写σ
+    int128 public lambda; // λ
+    int128 public eta1; // η1
+    int128 public eta2; //η2
+    int128 private _p; //
+    int128 private _q; //
 
-    int128 phi; //ϕ
+    int128 public phi; //ϕ
     // int128 alpha; //
-    int128 _pcpct; // pccp价格
-    int128 r; //SettlementBTCPrice 参数 0.03
+    int128 private _pcpct; // pccp价格
+    int128 public r; //SettlementBTCPrice 参数 0.03
 
     struct DeltaItem {
-        int128 delta; //2**64  int128
         int128 L1; //2**64  int128
         int128 L2; //2**64  int128
         int128 L3; //2**64  int128

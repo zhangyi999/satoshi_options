@@ -3,7 +3,6 @@ pragma solidity ^0.8.0;
 
 interface IConfig {
     struct DeltaItem {
-        int128 delta; //2**64  int128
         int128 L1; //2**64  int128
         int128 L2; //2**64  int128
         int128 L3; //2**64  int128
