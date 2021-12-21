@@ -4,9 +4,7 @@ pragma solidity ^0.8.0;
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../interface/IConfig.sol";
 
-// import "hardhat/console.sol";
-
-library LinearOption {
+contract LinearOption {
     using ABDKMath64x64 for int128;
 
     struct GetPBCTInfo {
@@ -33,15 +31,15 @@ library LinearOption {
     }
 
     //////////// 64x64 ////////////
-    function pow64x64(int128 a, int128 pow) internal pure returns (int128) {
+    function pow64x64(int128 a, int128 pow) public pure returns (int128) {
         return (pow.mul(a.log_2())).exp_2();
     }
 
-    function min128(int128 a, int128 b) internal pure returns (int128) {
+    function min128(int128 a, int128 b) public pure returns (int128) {
         return a < b ? a : b;
     }
 
-    function max128(int128 a, int128 b) internal pure returns (int128) {
+    function max128(int128 a, int128 b) public pure returns (int128) {
         return a > b ? a : b;
     }
 
@@ -49,7 +47,7 @@ library LinearOption {
         int128 _eta1_128,
         int128 L1,
         int128 L2
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         return _eta1_128.sub(L1).div(_eta1_128).mul(L2.div(L2.sub(L1)));
     }
 
@@ -57,12 +55,12 @@ library LinearOption {
         int128 _eta2_128,
         int128 L3,
         int128 L4
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         return _eta2_128.sub(L3).div(_eta2_128).mul(L4.div(L4.sub(L3)));
     }
 
     // 获取K
-    function getBk(int128 currBtc, int128 bk) internal pure returns (int128) {
+    function getBk(int128 currBtc, int128 bk) public pure returns (int128) {
         return currBtc.mul(bk);
     }
 
@@ -73,7 +71,7 @@ library LinearOption {
         int128 _eta1_128,
         int128 _eta2_128,
         int128 currBtc
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         int128 l1Orl3;
         int128 l2Orl4;
         int128 omg;
@@ -108,7 +106,7 @@ library LinearOption {
         int128 eta1,
         int128 eta2,
         int128 currBtc
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         int128 B0 = currBtc;
         int128 omg = _getPurchaseQuantityInfo.direction
             ? getUpOmg(eta1, deltaItem.L1, deltaItem.L2)
@@ -154,7 +152,7 @@ library LinearOption {
         bool direction,
         int128 K,
         int128 currBtc
-    ) internal pure returns (int128 _TB_int128) {
+    ) public pure returns (int128 _TB_int128) {
         if (direction) {
             _TB_int128 = min128(currBtc, K);
         } else {
@@ -167,7 +165,7 @@ library LinearOption {
         IConfig.DeltaItem memory _DeltaItem,
         int128 _eta1,
         int128 _eta2
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         int128 l1Orl3;
         int128 l2Orl4;
         int128 omg;
@@ -202,7 +200,7 @@ library LinearOption {
         IConfig.DeltaItem memory _DeltaItem,
         int128 eta1,
         int128 eta2
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         int128 l1Orl3;
         int128 l2Orl4;
         int128 _eta;
@@ -230,7 +228,7 @@ library LinearOption {
         int128 pbct,
         int128 Q,
         int128 phi
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         int128 _b = Q.mul(pbct);
         int128 _c = rl.mul(_b);
         int128 a2 = _c.sqrt();
@@ -249,7 +247,7 @@ library LinearOption {
         GetLiquidationNumInfo memory _getLiquidationNumInfo,
         int128 withdrawFee,
         int128 r
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         int128 _int = 1 << 64;
         int128 _a = _int.sub(withdrawFee).mul(
             _getLiquidationNumInfo.pbct.mul(_getLiquidationNumInfo.Q)
@@ -272,7 +270,7 @@ library LinearOption {
         int128 withdrawFee,
         int128 r,
         int128 Q
-    ) internal pure returns (int128) {
+    ) public pure returns (int128) {
         int128 pbct = getPBCT(BTCInfo, _DeltaItem, eta1, eta2);
 
         int128 rl = getRL(

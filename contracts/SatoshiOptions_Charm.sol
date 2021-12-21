@@ -17,7 +17,52 @@ import "./public/LinearOption.sol";
 
 // import "hardhat/console.sol";
 
-contract SatoshiOpstion_Charm is
+interface IStrategy {
+    struct GetPBCTInfo {
+        bool direction;
+        int128 delta;
+        int128 t;
+        int128 BK;
+        int128 K;
+        int128 BT;
+    }
+
+    struct GetPurchaseQuantityInfo {
+        bool direction;
+        int128 bk;
+        int128 delta;
+        int128 _i;
+    }
+
+    struct GetEInfo {
+        bool direction;
+        int128 delta;
+        int128 bk;
+    }
+
+    function getLiquidationNum(
+        GetPBCTInfo memory BTCInfo,
+        IConfig.DeltaItem memory _DeltaItem,
+        int128 eta1,
+        int128 eta2,
+        int128 phi,
+        int128 withdrawFee,
+        int128 r,
+        int128 Q
+    ) external view returns (int128);
+
+    function getBk(int128 currBtc, int128 bk) external pure returns (int128);
+
+    function getPurchaseQuantity(
+        GetPurchaseQuantityInfo memory _getPurchaseQuantityInfo,
+        IConfig.DeltaItem memory deltaItem,
+        int128 eta1,
+        int128 eta2,
+        int128 currBtc
+    ) external pure returns (int128);
+}
+
+contract SatoshiOptions_Charm is
     ERC1155Upgradeable,
     OwnableUpgradeable,
     ReentrancyGuardUpgradeable
@@ -30,6 +75,9 @@ contract SatoshiOpstion_Charm is
 
     //////////// token ////////////
     address public charm;
+
+    //////////// route ////////////
+    address public route;
 
     //////////// signer ////////////
     mapping(address => mapping(uint256 => bool)) private seenNonces;
@@ -47,13 +95,29 @@ contract SatoshiOpstion_Charm is
         bool direction;
         int128 bk;
         int128 K;
+        address strategy;
+        address tradeToken;
     }
     mapping(uint256 => NftData) private _nftStore;
+
+    //////////// strategy ////////////
+    mapping(address => bool) private _isStrategy;
 
     modifier onlySigner(SignedPriceInput calldata signedPr) {
         require(checkIdentity(signedPr), "Price Error.");
         _;
     }
+
+    modifier checkStrategy(address _strategy) {
+        require(_isStrategy[_strategy], "strategy Error.");
+        _;
+    }
+
+    modifier onlyRoute() {
+        require(route == _msgSender(), "Price Error.");
+        _;
+    }
+    
 
     event Open(address indexed owner, uint256 indexed pid, uint256 btcPrice);
     event Cloes(
@@ -65,13 +129,13 @@ contract SatoshiOpstion_Charm is
 
     function initialize(
         string memory uri_,
-        address _charm,
+        // address _charm,
         IConfig _config
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
         __ERC1155_init(uri_);
-        charm = _charm;
+        // charm = _charm;
         config = _config;
     }
 
@@ -80,12 +144,17 @@ contract SatoshiOpstion_Charm is
         DATA_PROVIDER = _provider; // 0x9548B3682cD65D3265C92d5111a9782c86Ca886d
     }
 
+    function setStrategy(address _strategy) external onlyOwner {
+        _isStrategy[_strategy] = true;
+    }
+
     //验证前端价格是否正确
     // 开仓
     struct SignedPriceInput {
         address tradeToken;
         uint128 tradePrice;
         uint256 nonce;
+        uint256 deadline;
         bytes signature;
     } 
 
@@ -96,12 +165,14 @@ contract SatoshiOpstion_Charm is
         // This recreates the message hash that was signed on the client.
         int128 tradePrice = int128(signedPr.tradePrice);
         uint256 nonce = signedPr.nonce;
+        uint256 deadline = signedPr.deadline;
         bytes calldata signature = signedPr.signature;
         bytes32 hash = keccak256(
             abi.encodePacked(
                 signedPr.tradeToken,
                 tradePrice,
                 nonce,
+                deadline,
                 DATA_PROVIDER
             )
         );
@@ -109,6 +180,7 @@ contract SatoshiOpstion_Charm is
 
         // Verify that the message's signer is the data provider
         address signer = messageHash.recover(signature);
+        require(deadline >= block.timestamp, "Prices have expired");
         require(signer == DATA_PROVIDER, "INVALID_SIGNER.");
         require(!seenNonces[signer][nonce], "USED_NONCE");
         seenNonces[signer][nonce] = true;
@@ -126,19 +198,22 @@ contract SatoshiOpstion_Charm is
         return _nftStore[_pid];
     }
 
-    function open(
+    function mintTo(
+        address _to,
         bool direction,
         uint128 _delta,
         uint128 _bk,
         uint128 _cppcNum,
+        address _strategy,
         SignedPriceInput calldata signedPr
-    ) public onlySigner(signedPr) returns (uint256 pid) {
+    ) public onlySigner(signedPr) checkStrategy(_strategy) onlyRoute nonReentrant returns (uint256 pid) {
 
         int128 tradePrice = int128(signedPr.tradePrice);
-        int128 K = LinearOption.getBk(tradePrice, int128(_bk));
 
-        int128 _pbc = LinearOption.getPurchaseQuantity(
-            LinearOption.GetPurchaseQuantityInfo(
+        IStrategy strategy = IStrategy(_strategy);
+        int128 K = strategy.getBk(tradePrice, int128(_bk));
+        int128 _pbc = strategy.getPurchaseQuantity(
+            IStrategy.GetPurchaseQuantityInfo(
                 direction,
                 int128(_bk),
                 int128(_delta),
@@ -151,7 +226,8 @@ contract SatoshiOpstion_Charm is
         );
 
         // pbc int128 64*64
-        pid = _mintNft(_msgSender(), uint128(_pbc));
+        pid = _mintNft(_to, uint128(_pbc));
+
         NftData storage nftData = _nftStore[pid];
         nftData.delta = int128(_delta);
         nftData.direction = direction;
@@ -159,8 +235,11 @@ contract SatoshiOpstion_Charm is
         nftData.openPrice = tradePrice;
         nftData.bk = int128(_bk);
         nftData.K = K;
-        _burnFor(_msgSender(), _cppcNum / (1 << 64));
-        emit Open(_msgSender(), pid, signedPr.tradePrice);
+        nftData.strategy = _strategy;
+        nftData.tradeToken = signedPr.tradeToken;
+
+        // _burnFor(_to, _cppcNum / (1 << 64));
+        emit Open(_to, pid, signedPr.tradePrice);
         return pid;
     }
 
@@ -174,14 +253,20 @@ contract SatoshiOpstion_Charm is
     }
 
     // 平仓
-    function close(
+    function burnFor(
+        address _from,
         uint256 _pid,
         uint128 _cAmount,
         SignedPriceInput calldata signedPr
-    ) public payable onlySigner(signedPr) {
+    ) public onlySigner(signedPr) onlyRoute nonReentrant returns(uint256 _liquidationNum) {
         NftData storage nftData = _nftStore[_pid];
-        int128 LiquidationNum = LinearOption.getLiquidationNum(
-            LinearOption.GetPBCTInfo(
+        require(nftData.tradeToken == signedPr.tradeToken, "tradeToken error");
+
+        IStrategy strategy = IStrategy(nftData.strategy);
+        nftData.tradeToken = signedPr.tradeToken;
+        
+        int128 LiquidationNum = strategy.getLiquidationNum(
+            IStrategy.GetPBCTInfo(
                 nftData.direction,
                 nftData.delta,
                 int128(uint128((block.timestamp - nftData.createTime) << 64)),
@@ -198,9 +283,11 @@ contract SatoshiOpstion_Charm is
             int128(_cAmount)
         );
 
-        _burnNft(_msgSender(), _pid, _cAmount);
-        _mintCppc(_msgSender(), uint128(LiquidationNum / (1 << 64)));
-        emit Cloes(_msgSender(), _pid, signedPr.tradePrice, _cAmount);
+        _liquidationNum = uint128(LiquidationNum / (1 << 64));
+
+        _burnNft(_from, _pid, _cAmount);
+        // _mintCppc(_from, _liquidationNum);
+        emit Cloes(_from, _pid, signedPr.tradePrice, _cAmount);
     }
 
     function _mintNft(address _to, uint256 _amount) internal returns (uint256) {
@@ -216,12 +303,12 @@ contract SatoshiOpstion_Charm is
         _burn(from, id, amount);
     }
 
-    function _mintCppc(address to, uint256 amount) internal {
-        IERC20Interface(charm).issue(to, amount);
-    }
+    // function _mintCppc(address to, uint256 amount) internal {
+    //     IERC20Interface(charm).issue(to, amount);
+    // }
 
-    function _burnFor(address from, uint256 amount) internal {
-        charm.safeTransferFrom(from, address(this), amount);
-        IERC20Interface(charm).burn(amount);
-    }
+    // function _burnFor(address from, uint256 amount) internal {
+    //     charm.safeTransferFrom(from, address(this), amount);
+    //     IERC20Interface(charm).burn(amount);
+    // }
 }
