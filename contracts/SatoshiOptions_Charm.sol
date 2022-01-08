@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.3;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -117,7 +117,6 @@ contract SatoshiOptions_Charm is
         require(route == _msgSender(), "Price Error.");
         _;
     }
-    
 
     event Open(address indexed owner, uint256 indexed pid, uint256 btcPrice);
     event Cloes(
@@ -156,7 +155,7 @@ contract SatoshiOptions_Charm is
         uint256 nonce;
         uint256 deadline;
         bytes signature;
-    } 
+    }
 
     function checkIdentity(SignedPriceInput calldata signedPr)
         public
@@ -206,12 +205,18 @@ contract SatoshiOptions_Charm is
         uint128 _cppcNum,
         address _strategy,
         SignedPriceInput calldata signedPr
-    ) public onlySigner(signedPr) checkStrategy(_strategy) onlyRoute nonReentrant returns (uint256 pid) {
-
+    )
+        public
+        onlySigner(signedPr)
+        checkStrategy(_strategy)
+        onlyRoute
+        nonReentrant
+        returns (uint256 pid)
+    {
         int128 tradePrice = int128(signedPr.tradePrice);
 
         IStrategy strategy = IStrategy(_strategy);
-        int128 K = strategy.getBk(tradePrice, int128(_bk));
+        // int128 K = strategy.getBk(tradePrice, int128(_bk));
         int128 _pbc = strategy.getPurchaseQuantity(
             IStrategy.GetPurchaseQuantityInfo(
                 direction,
@@ -234,7 +239,7 @@ contract SatoshiOptions_Charm is
         nftData.createTime = block.timestamp;
         nftData.openPrice = tradePrice;
         nftData.bk = int128(_bk);
-        nftData.K = K;
+        nftData.K = strategy.getBk(tradePrice, int128(_bk));
         nftData.strategy = _strategy;
         nftData.tradeToken = signedPr.tradeToken;
 
@@ -258,13 +263,19 @@ contract SatoshiOptions_Charm is
         uint256 _pid,
         uint128 _cAmount,
         SignedPriceInput calldata signedPr
-    ) public onlySigner(signedPr) onlyRoute nonReentrant returns(uint256 _liquidationNum) {
+    )
+        public
+        onlySigner(signedPr)
+        onlyRoute
+        nonReentrant
+        returns (uint256 _liquidationNum)
+    {
         NftData storage nftData = _nftStore[_pid];
         require(nftData.tradeToken == signedPr.tradeToken, "tradeToken error");
 
         IStrategy strategy = IStrategy(nftData.strategy);
         nftData.tradeToken = signedPr.tradeToken;
-        
+
         int128 LiquidationNum = strategy.getLiquidationNum(
             IStrategy.GetPBCTInfo(
                 nftData.direction,
