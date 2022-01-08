@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "../interface/IERC20Interface.sol";
+import "../interfaces/IERC20Interface.sol";
 
 library SafeToken {
     function myBalance(address token) internal view returns (uint256) {

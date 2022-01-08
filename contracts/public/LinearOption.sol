@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-import "../interface/IConfig.sol";
+import "../interfaces/IConfig.sol";
 
 contract LinearOption {
     using ABDKMath64x64 for int128;

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-interface ISatoshiOptions {
+interface IIssuerForSatoshiOptions {
     struct SignedPriceInput {
         address tradeToken;
         uint128 tradePrice;

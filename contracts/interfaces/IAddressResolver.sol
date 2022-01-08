@@ -4,8 +4,6 @@ pragma solidity >=0.4.24;
 interface IAddressResolver {
     function getAddress(bytes32 name) external view returns (address);
 
-    function getCbbcTokenAddress(bytes32 key) external view returns (address);
-
     function getDividendTokenAddress(bytes32 key) external view returns (address) ;
 
     function getLiquidityTokenAddress(bytes32 key) external view returns (address);

@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.3;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -11,7 +11,7 @@ import "abdk-libraries-solidity/ABDKMath64x64.sol";
 
 import "./libraries/ECDSA.sol";
 import "./libraries/SafeToken.sol";
-import "./interface/IConfig.sol";
+import "./interfaces/IConfig.sol";
 
 import "./public/BinaryOptions.sol";
 
