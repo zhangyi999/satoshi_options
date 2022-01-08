@@ -1,25 +1,25 @@
 pragma solidity ^0.8.3;
 
-import "./Owned.sol";
+import "./cbbc_related/Owned.sol";
 //import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
-import "./ExternStateToken.sol";
+import "./cbbc_related/MixinSystemSettings.sol";
+import "./cbbc_related/ExternStateToken.sol";
 
-import './interfaces/ICbbcToken.sol';
-import './interfaces/ILiquidityToken.sol';
-import './interfaces/ICharmToken.sol';
-import './interfaces/IRouter.sol';
-import './interfaces/IERC20.sol';
-import './interfaces/IOrchestrator.sol';
-import './interfaces/IWETH.sol';
-import "./interfaces/IIssuerForCbbcToken.sol";
-import "./interfaces/IIssuerForLiquidityToken.sol";
-import "./interfaces/IIssuerForDividendToken.sol";
+import './cbbc_related/interfaces/ICbbcToken.sol';
+import './cbbc_related/interfaces/ILiquidityToken.sol';
+import './cbbc_related/interfaces/ICharmToken.sol';
+import './cbbc_related/interfaces/IRouter.sol';
+import './cbbc_related/interfaces/IERC20.sol';
+import './cbbc_related/interfaces/IOrchestrator.sol';
+import './cbbc_related/interfaces/IWETH.sol';
+import "./cbbc_related/interfaces/IIssuerForCbbcToken.sol";
+import "./cbbc_related/interfaces/IIssuerForLiquidityToken.sol";
+import "./cbbc_related/interfaces/IIssuerForDividendToken.sol";
 
-import './libraries/CbbcLibrary.sol';
-import './libraries/TransferHelper.sol';
+import './cbbc_related/libraries/CbbcLibrary.sol';
+import './cbbc_related/libraries/TransferHelper.sol';
 
-import "./interface/ISatoshiOpsition.sol";
+import './interface/ISatoshiOptions.sol';
 import "./libraries/SafeToken.sol";
 
 
@@ -100,70 +100,6 @@ contract Router is IRouter, MixinSystemSettings, Owned{
 
     function satoshiOptions() internal view returns (ISatoshiOptions) {
         return ISatoshiOptions(requireAndGetAddress(CONTRACT_SATOSHIOPTIONS));
-    }
-
-    
-
-//       /*  MUTATIVE FUNCTIONS ========== */
-    // *** Update oracle and rebase ***
-    function _rebase(bytes32 cTokenKey) private {
-        ICbbcToken cToken = issuerForCbbcToken().cTokens(cTokenKey);
-
-        uint rebasePrice = cToken.rebasePrice();
-
-        (uint currentPrice, ) = marketOracle().priceAndTimestamp(cToken.tradeTokenKey());
-
-        if(rebasePrice + rebasePrice * getUpperRebaseThreshold() / uint(cToken.leverage()) / 10**18 < currentPrice ||
-            rebasePrice - rebasePrice * getLowerRebaseThreshold() / uint(cToken.leverage()) / 10**18 > currentPrice)
-        {
-            orchestrator().rebase(cToken);
-        }
-    }
-/*
-    function rebase(
-        signedPrice calldata signedPr,
-        ICbbcToken cbbcToken
-    ) external virtual override returns (bool){
-        require(_checkIdentityAndUpdateOracle(cbbcToken.tradeToken(), signedPr), "CBBC: UPDATE_ORACLE_FAILED.");
-        orchestrator.rebase(cbbcToken);
-        return true;
-    }
-*/
-    function rebase(
-        IMarketOracle.signedPrice calldata signedPr,
-        bytes32 tradeTokenKey,
-        bytes32[] calldata cTokenKeys
-    ) external virtual override returns (bool){
-
-        uint256 numberOfCbbcs = cTokenKeys.length;
-
-        require(numberOfCbbcs > 0, "CBBC: NONE_TO_REBASE.");
-
-        require(marketOracle().updateOracle(tradeTokenKey, signedPr), "CBBC: UPDATE_ORACLE_FAILED.");
-
-        for(uint256 i = 0; i < numberOfCbbcs; i++){
-            bytes32 cTokenKey = cTokenKeys[i];
-
-            ICbbcToken cToken = issuerForCbbcToken().cTokens(cTokenKey);
-
-            require(cToken.tradeTokenKey() == tradeTokenKey, "CBBC: TRADE_TOKEN_MISMATCH.");
-
-            orchestrator().rebase(cToken);
-        }
-        /*
-        uint256 cbbcPrice;
-        ICbbcToken cbbcToken;
-        for(uint256 i = 0; i < numberOfCbbcs; i++){
-            cbbcToken = cbbcTokens[i];
-            cbbcPrice = getCbbcPrice(cbbcToken, 0, 0, ICbbcFactory.tradeDirection.buyCbbc);
-            if(10**18 + rebaseThresholdInCbbcPrice < cbbcPrice ||
-                10**18 - rebaseThresholdInCbbcPrice > cbbcPrice)
-                {
-                orchestrator.rebase(cbbcToken);
-                }
-        }
-        */
-        return true;
     }
 
     // **** ADD LIQUIDITY ****
