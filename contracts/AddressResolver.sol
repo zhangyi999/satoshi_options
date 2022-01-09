@@ -6,7 +6,6 @@ import "./MixinResolver.sol";
 
 // Internal references
 import "./interfaces/IAddressResolver.sol";
-import "./interfaces/IIssuerForCbbcToken.sol";
 import "./interfaces/IIssuerForDividendToken.sol";
 import "./interfaces/IIssuerForLiquidityToken.sol";
 
@@ -59,12 +58,6 @@ contract AddressResolver is Owned, IAddressResolver {
         return _foundAddress;
     }
 
-
-    function getCbbcTokenAddress(bytes32 key) external view override returns (address) {
-        IIssuerForCbbcToken issuer = IIssuerForCbbcToken(repository["IssuerForCbbcToken"]);
-        require(address(issuer) != address(0), "Cannot find Issuer address");
-        return address(issuer.cTokens(key));
-    }
 
     function getDividendTokenAddress(bytes32 key) external view override returns (address) {
         IIssuerForDividendToken issuer = IIssuerForDividendToken(repository["IssuerForDividendToken"]);

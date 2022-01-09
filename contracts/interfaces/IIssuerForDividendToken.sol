@@ -33,9 +33,4 @@ interface IIssuerForDividendToken {
         uint amountOfCharmToBurn
     ) external returns (uint);
 
-    function burnDividendTokens(
-        bytes32 currencyKey,
-        address from,
-        uint amountOfDTokenToBurn
-        ) external returns(uint256);
 }

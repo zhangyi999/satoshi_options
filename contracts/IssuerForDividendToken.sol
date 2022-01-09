@@ -13,7 +13,6 @@ import "./libraries/SafeDecimalMath.sol";
 // Internal references
 import "./interfaces/ISystemStatus.sol";
 import "./interfaces/IIssuerForDividendToken.sol";
-import "./interfaces/IIssuerForCbbcToken.sol";
 import "./interfaces/IIssuerForLiquidityToken.sol";
 import "./interfaces/ICharmToken.sol";
 import "./interfaces/IBaseToken.sol";
@@ -78,20 +77,12 @@ contract IssuerForDividendToken is Owned, MixinSystemSettings, IIssuerForDividen
         return requireAndGetAddress(CONTRACT_ROUTER);
     }
 
-    function issuerForCbbcToken() internal view returns (IIssuerForCbbcToken) {
-        return IIssuerForCbbcToken(requireAndGetAddress(CONTRACT_ISSUER_FOR_CBBC_TOKEN));
-    }
-
     function issuerForLiquidityToken() internal view returns (IIssuerForLiquidityToken) {
         return IIssuerForLiquidityToken(requireAndGetAddress(CONTRACT_ISSUER_FOR_LIQUIDITY_TOKEN));
     }
 
     function _settleTokenKey(IDividendToken token) internal view returns (bytes32) {
         return token.settleTokenKey();
-    }
-
-    function _claimableProfits(bytes32 settleTokenKey) internal view returns (uint) {
-        return issuerForCbbcToken().claimableProfits(settleTokenKey);
     }
 
     function _availableDTokenKeys() internal view returns (bytes32[] memory) {
@@ -236,15 +227,15 @@ contract IssuerForDividendToken is Owned, MixinSystemSettings, IIssuerForDividen
         return _issueDTokens(dToken, to, amountOfCharmToBurn);
     }
 
-    function burnDividendTokens(
-        bytes32 currencyKey,
-        address from,
-        uint amountOfDTokenToBurn
-        ) external lock onlyRouter override returns(uint256){
-        IDividendToken dToken = dTokens[currencyKey];
+    // function burnDividendTokens(
+    //     bytes32 currencyKey,
+    //     address from,
+    //     uint amountOfDTokenToBurn
+    //     ) external lock onlyRouter override returns(uint256){
+    //     IDividendToken dToken = dTokens[currencyKey];
 
-        return _burnDTokens(dToken, from, amountOfDTokenToBurn);
-    }
+    //     return _burnDTokens(dToken, from, amountOfDTokenToBurn);
+    // }
 
     /* ========== INTERNAL FUNCTIONS ========== */
     function _issueDTokens(
@@ -266,36 +257,36 @@ contract IssuerForDividendToken is Owned, MixinSystemSettings, IIssuerForDividen
         return amountOfDToken;
     }
 
-    function _burnDTokens(
-        IDividendToken dToken,
-       address destAccount,
-        uint amountOfDTokenToBurn
-     ) internal returns (uint profitsClaimed) {
-         bytes32 settleTokenKey = dToken.settleTokenKey();
+    // function _burnDTokens(
+    //     IDividendToken dToken,
+    //    address destAccount,
+    //     uint amountOfDTokenToBurn
+    //  ) internal returns (uint profitsClaimed) {
+    //      bytes32 settleTokenKey = dToken.settleTokenKey();
 
-         bool isTradeTokenSuspended = _isSettleTokenSuspended(settleTokenKey);
+    //      bool isTradeTokenSuspended = _isSettleTokenSuspended(settleTokenKey);
 
-         uint256 claimableProfits = _claimableProfits(settleTokenKey);
+    //      uint256 claimableProfits = _claimableProfits(settleTokenKey);
 
-         uint256 shareOfDToken = amountOfDTokenToBurn.divideDecimal(IERC20(address(dToken)).totalSupply());
+    //      uint256 shareOfDToken = amountOfDTokenToBurn.divideDecimal(IERC20(address(dToken)).totalSupply());
 
-         uint256 amountOfCharm = dToken.burnedCharm().multiplyDecimal(shareOfDToken);
+    //      uint256 amountOfCharm = dToken.burnedCharm().multiplyDecimal(shareOfDToken);
 
-        if (isTradeTokenSuspended) {
-            profitsClaimed = claimableProfits.multiplyDecimal(shareOfDToken);
-        } else {
-            profitsClaimed = claimableProfits.multiplyDecimal(shareOfDToken).multiplyDecimal(shareOfDToken + SafeDecimalMath.UNIT)/2;
-        }
+    //     if (isTradeTokenSuspended) {
+    //         profitsClaimed = claimableProfits.multiplyDecimal(shareOfDToken);
+    //     } else {
+    //         profitsClaimed = claimableProfits.multiplyDecimal(shareOfDToken).multiplyDecimal(shareOfDToken + SafeDecimalMath.UNIT)/2;
+    //     }
 
-        require(profitsClaimed > 0 && profitsClaimed <= claimableProfits, "Profits claim amount must be greater than 0 and less than claimable profits.");
+    //     require(profitsClaimed > 0 && profitsClaimed <= claimableProfits, "Profits claim amount must be greater than 0 and less than claimable profits.");
 
-        ILiquidityToken lToken = issuerForLiquidityToken().lTokensForSettleToken(settleTokenKey);
+    //     ILiquidityToken lToken = issuerForLiquidityToken().lTokensForSettleToken(settleTokenKey);
 
-        require(dToken.burn(address(this), amountOfDTokenToBurn, amountOfCharm), "CBBC: Failed to burn DToken.");
+    //     require(dToken.burn(address(this), amountOfDTokenToBurn, amountOfCharm), "CBBC: Failed to burn DToken.");
 
-        lToken.transferSettleToken(destAccount, profitsClaimed);
+    //     lToken.transferSettleToken(destAccount, profitsClaimed);
 
-    }
+    // }
 
 
     /* ========== MODIFIERS ========== */

@@ -6,7 +6,6 @@ import "./MixinSystemSettings.sol";
 
 import "./interfaces/IMarketOracle.sol";
 import "./interfaces/IExchangeRates.sol";
-import "./interfaces/IIssuerForCbbcToken.sol";
 
 import "./libraries/ECDSA.sol";
 
@@ -48,10 +47,6 @@ contract MarketOracle is Owned, MixinSystemSettings, IMarketOracle{
 
     function exchangeRates() internal view returns (IExchangeRates) {
         return IExchangeRates(requireAndGetAddress(CONTRACT_EXCHANGERATES));
-    }
-
-    function issuer() internal view returns (IIssuerForCbbcToken) {
-        return IIssuerForCbbcToken(requireAndGetAddress(CONTRACT_ISSUER));
     }
 
     function priceAndTimestamp(bytes32 token) external view override returns (uint256 price, uint256 timestamp) {

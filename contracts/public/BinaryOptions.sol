@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.3;
 
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
-import "../interface/IConfig.sol";
+import "../interfaces/IConfig.sol";
 
 contract BinaryOptions {
     using ABDKMath64x64 for int128;
