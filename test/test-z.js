@@ -85,11 +85,11 @@ function getNumForBig(big) {
 
 // CBBCRouter
 let accounts, deployer, user, factory, tToken0;
+const web3 = new Web3();
+const abi = require('ethereumjs-abi');
+const PRIVATE_KEY = "0x1b502936fcfa1381d1bc454dac74f1a2d2c7e4ed7634fe1acc57b0fa32c5f26e";  
 let nonce = new BigNumber(0);
 const SIGNER_ADDRESS = web3.eth.accounts.privateKeyToAccount(PRIVATE_KEY).address; //2109
-console.log({
-    SIGNER_ADDRESS
-})
 
 
 function getPriceData(tokenAddress, tradePrice) {
