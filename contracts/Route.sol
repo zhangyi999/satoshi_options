@@ -1,28 +1,7 @@
 pragma solidity ^0.8.3;
 
-import "./cbbc_related/Owned.sol";
+// import "./cbbc_related/Owned.sol";
 //import "./MixinResolver.sol";
-<<<<<<< HEAD
-import "./cbbc_related/MixinSystemSettings.sol";
-import "./cbbc_related/ExternStateToken.sol";
-
-import './cbbc_related/interfaces/ICbbcToken.sol';
-import './cbbc_related/interfaces/ILiquidityToken.sol';
-import './cbbc_related/interfaces/ICharmToken.sol';
-import './cbbc_related/interfaces/IRouter.sol';
-import './cbbc_related/interfaces/IERC20.sol';
-import './cbbc_related/interfaces/IOrchestrator.sol';
-import './cbbc_related/interfaces/IWETH.sol';
-import "./cbbc_related/interfaces/IIssuerForCbbcToken.sol";
-import "./cbbc_related/interfaces/IIssuerForLiquidityToken.sol";
-import "./cbbc_related/interfaces/IIssuerForDividendToken.sol";
-
-import './cbbc_related/libraries/CbbcLibrary.sol';
-import './cbbc_related/libraries/TransferHelper.sol';
-
-import './interface/ISatoshiOptions.sol';
-import "./libraries/SafeToken.sol";
-=======
 import "./MixinSystemSettings.sol";
 import "./ExternStateToken.sol";
 
@@ -35,7 +14,6 @@ import "./interfaces/IIssuerForLiquidityToken.sol";
 import "./interfaces/IIssuerForDividendToken.sol";
 
 import "./libraries/TransferHelper.sol";
->>>>>>> 18986cea25fe863d8ecbada398dbc51eec1aeacd
 
 import "./interfaces/IIssuerForSatoshiOptions.sol";
 
@@ -142,16 +120,11 @@ contract Router is IRouter, MixinSystemSettings, Owned {
     //     return IOrchestrator(requireAndGetAddress(CONTRACT_ORCHESTRATOR));
     // }
 
-<<<<<<< HEAD
-    function satoshiOptions() internal view returns (ISatoshiOptions) {
-        return ISatoshiOptions(requireAndGetAddress(CONTRACT_SATOSHIOPTIONS));
-=======
     function satoshiOptions() internal view returns (IIssuerForSatoshiOptions) {
         return
             IIssuerForSatoshiOptions(
                 requireAndGetAddress(CONTRACT_SATOSHIOPTIONS)
             );
->>>>>>> 18986cea25fe863d8ecbada398dbc51eec1aeacd
     }
 
     // **** ADD LIQUIDITY ****
@@ -500,9 +473,9 @@ contract Router is IRouter, MixinSystemSettings, Owned {
         uint128 _cppcNum,
         address _strategy,
         IIssuerForSatoshiOptions.SignedPriceInput calldata signedPr
-    ) external payable override returns (uint256 pid) {
+    ) external payable override returns (uint256 pid, uint256 mintBalance) {
         _deposit(signedPr.tradeToken, msg.sender, _cppcNum);
-        pid = satoshiOptions().mintTo(
+        (pid,mintBalance) = satoshiOptions().mintTo(
             msg.sender,
             direction,
             _delta,

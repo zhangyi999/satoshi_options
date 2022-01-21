@@ -18,7 +18,7 @@ interface IIssuerForSatoshiOptions {
         uint128 _cppcNum,
         address _strategy,
         SignedPriceInput calldata signedPr
-    ) external returns (uint256 pid);
+    ) external returns (uint256 pid, uint256 mintBalance);
 
     function burnFor(
         address _from,

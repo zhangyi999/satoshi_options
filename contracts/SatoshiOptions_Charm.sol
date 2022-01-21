@@ -211,7 +211,7 @@ contract SatoshiOptions_Charm is
         checkStrategy(_strategy)
         onlyRoute
         nonReentrant
-        returns (uint256 pid)
+        returns (uint256 pid, uint256 mintBalance)
     {
         int128 tradePrice = int128(signedPr.tradePrice);
 
@@ -231,7 +231,8 @@ contract SatoshiOptions_Charm is
         );
 
         // pbc int128 64*64
-        pid = _mintNft(_to, uint128(_pbc));
+        mintBalance = uint128(_pbc);
+        pid = _mintNft(_to, mintBalance);
 
         NftData storage nftData = _nftStore[pid];
         nftData.delta = int128(_delta);
