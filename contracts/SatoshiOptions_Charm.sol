@@ -197,6 +197,10 @@ contract SatoshiOptions_Charm is
         return _nftStore[_pid];
     }
 
+    function setRoute(address _route) external {
+        route = _route;
+    }
+
     function mintTo(
         address _to,
         bool direction,
