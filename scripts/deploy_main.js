@@ -8,6 +8,22 @@ const Web3 = require('web3');
 const { BigNumber: BN } = ethers
 
 // console.log(.toHexString())
+// cbbcRouterAddress: '0x52B307ccA4936F35AC850e212F6B94d1D0940A94',
+//       orchestratorAddress: '0xEF1B5eE21bC55592b30c8ed85eB66cAb67A8110D',
+//       marketOracleAddress: '0xC68A93B2BB86192B544456A24c6F6234A0961508',
+
+//       wethAddress: '0xd0a1e359811322d97991e03f863a0c30c2cf029c', // 注：就是结算币ETH的address（heco下就是HT的address）
+//       addressResolver: '0xfF46780c39C878B7f4aF4FB8029e8b01F7157f19',
+
+//       cppcChefAddress: '0x2F54904AD371235c135697fD78612808c3dFbbd3',
+const address = {
+    kov: {
+        charm: '0x8a10932A85dAc0b75BBb99EAc0A0334FF57B9Cd9',
+        router: '0x52B307ccA4936F35AC850e212F6B94d1D0940A94'
+    }
+}
+
+const ADDR = address['kov']
 
 const web3 = new Web3();
 const abi = require('ethereumjs-abi');
@@ -91,65 +107,106 @@ let charm_token;
 
 async function main() {
     //////// config ////////
-    config = await ethers.getContractFactory("contracts/Config.sol:Config");
-    config = await config.deploy();
-    console.log("config address: ", config.address)
+    // config = await ethers.getContractFactory("contracts/Config.sol:Config");
+    // config = await config.deploy();
+    // console.log("config address: ", config.address)
 
-    let tx = await config.setConfig([
-        getInt128(depositFee),
-        getInt128(withdrawFee),
-        getInt128(sigma),
-        getInt128(lambda),
-        getInt128(eta1),
-        getInt128(eta2),
-        getInt128(p),
-        getInt128(q),
-        getInt128(phi),
-        getInt128(pcpct),
-        getInt128(r)
-    ])
-    console.log("set config hash: ",tx.hash)
-    await tx.wait()
+    // let tx = await config.setConfig([
+    //     getInt128(depositFee),
+    //     getInt128(withdrawFee),
+    //     getInt128(sigma),
+    //     getInt128(lambda),
+    //     getInt128(eta1),
+    //     getInt128(eta2),
+    //     getInt128(p),
+    //     getInt128(q),
+    //     getInt128(phi),
+    //     getInt128(pcpct),
+    //     getInt128(r)
+    // ])
+    // console.log("set config hash: ",tx.hash)
+    // await tx.wait()
 
-    tx = await config.setLTable(
-        ltable.map((item) => {
-            return [
-                getInt128(item.delta),
-                getInt128(item.l1),
-                getInt128(item.l2),
-                getInt128(item.l3),
-                getInt128(item.l4),
-            ]
-        })
-    )
-    console.log("set LTable hash: ",tx.hash)
-    await tx.wait()
+    // tx = await config.setLTable(
+    //     ltable.map((item) => {
+    //         return [
+    //             getInt128(item.delta),
+    //             getInt128(item.l1),
+    //             getInt128(item.l2),
+    //             getInt128(item.l3),
+    //             getInt128(item.l4),
+    //         ]
+    //     })
+    // )
+    // console.log("set LTable hash: ",tx.hash)
+    // await tx.wait()
 
-    //////// charm token ////////
-    charm_token = await ethers.getContractFactory("Charm");
-    charm_token = await charm_token.deploy()
-    console.log("charm_token to: ", charm_token.address)
+    // //////// charm token ////////
+    // charm_token = await ethers.getContractFactory("Charm");
+    // // charm_token = await charm_token.deploy()
+    // charm_token = charm_token.attach(ADDR.charm)
+    // console.log("charm_token to: ", charm_token.address)
 
+    // //////// BinaryOptions & LinearOption ////////
+    // let BinaryOptions = await ethers.getContractFactory("BinaryOptions");
+
+    // BinaryOptions = await BinaryOptions.deploy()
+    // console.log('BinaryOptions tp: ', BinaryOptions.address)
+
+    // let LinearOptions = await ethers.getContractFactory("LinearOptions");
+    // LinearOptions = await LinearOptions.deploy()
+    // console.log('LinearOptions tp: ', LinearOptions.address)
+
+    // config address:  0xFB29cf3e321D6C52e5900ac62Bd07A72c4E5A65D
+    // set config hash:  0x732287f722e5371929fd0cbc173d7105999420f13e82b2485c338723eadff322
+    // set LTable hash:  0x053f60437262b481332a821b5522d7c836d9d2ee2149e6f15f9170d9c2e966a0
+    // charm_token to:  0x8a10932A85dAc0b75BBb99EAc0A0334FF57B9Cd9
+    // BinaryOptions to:  0x85656cF8451CeB81B0A48A03B82A0A0230bf1c28
+    // LinearOptions to:  0x3374822edb84D0645C64fDa075e15D1b3B721247
+    // SatoshiOptions_Charm to: 0x85656cF8451CeB81B0A48A03B82A0A0230bf1c28
     //////// 线性期权 ////////
-    SatoshiOpstion_Charm = await ethers.getContractFactory("SatoshiOpstion_Charm");
-    SatoshiOpstion_Charm = await upgrades.deployProxy(SatoshiOpstion_Charm,[
-        'http://satoshiOpstion_sharm',
-        charm_token.address,
-        config.address
-    ]);
-    console.log("SatoshiOpstion_Charm to: ", SatoshiOpstion_Charm.address)
+    SatoshiOpstion_Charm = await ethers.getContractFactory("SatoshiOptions_Charm");
+    // SatoshiOpstion_Charm = await upgrades.deployProxy(SatoshiOpstion_Charm,[
+    //     'https://satoshiOpstion_sharm',
+    //     // config.address
+    //     '0xFB29cf3e321D6C52e5900ac62Bd07A72c4E5A65D'
+    // ]);
+    // console.log("SatoshiOpstion_Charm to: ", SatoshiOpstion_Charm.address)
 
+    SatoshiOpstion_Charm = SatoshiOpstion_Charm.attach('0x0D51Cb4bAc75F70cb294e6c006D5DD1eAc4b6D5A') 
     tx = await SatoshiOpstion_Charm.setDataProvider(
-        SIGNER_ADDRESS
+        '0xCDC15F917788E0cB7BB125F222B6124Fd8a6ef4C'
     )
     console.log("set siger hash: ",tx.hash)
     await tx.wait()
 
-    let [owner, alice, bob] = await ethers.getSigners()
-    const mintAmount = BN.from(100000).mul('0x' + (1e18))
-    tx = await charm_token.mint(owner.address, mintAmount)
-    console.log('mint: ',tx.hash)
-    await tx.wait()
+    // tx = await SatoshiOpstion_Charm.setStrategy(
+    //     // BinaryOptions.address
+    //     '0x85656cF8451CeB81B0A48A03B82A0A0230bf1c28'
+    // )
+    // console.log("setStrategy hash: ",tx.hash)
+    // await tx.wait()
+
+    // tx = await SatoshiOpstion_Charm.setStrategy(
+    //     // LinearOptions.address
+    //     '0x3374822edb84D0645C64fDa075e15D1b3B721247'
+    // )
+    // console.log("setStrategy hash: ",tx.hash)
+    // await tx.wait()
+
+    // tx = await SatoshiOpstion_Charm.setRoute(
+    //     ADDR.router
+    // )
+    // console.log("setRoute hash: ",tx.hash)
+    // await tx.wait()
+
+
+
+    // let [owner, alice, bob] = await ethers.getSigners()
+    // const mintAmount = BN.from(100000).mul('0x' + (1e18))
+    // tx = await charm_token.mint(owner.address, mintAmount)
+    // console.log('mint: ',tx.hash)
+    // await tx.wait()
 }
 
 // We recommend this pattern to be able to use async/await everywhere

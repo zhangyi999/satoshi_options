@@ -13,7 +13,8 @@ import "./libraries/ECDSA.sol";
 import "./libraries/SafeToken.sol";
 import "./interfaces/IConfig.sol";
 
-import "./public/LinearOption.sol";
+// import "./public/LinearOptions.sol";
+
 
 // import "hardhat/console.sol";
 
@@ -128,13 +129,11 @@ contract SatoshiOptions_Charm is
 
     function initialize(
         string memory uri_,
-        // address _charm,
         IConfig _config
     ) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
         __ERC1155_init(uri_);
-        // charm = _charm;
         config = _config;
     }
 
@@ -147,6 +146,10 @@ contract SatoshiOptions_Charm is
         _isStrategy[_strategy] = true;
     }
 
+    function setRoute(address _route) external onlyOwner {
+        route = _route;
+    }
+ 
     //验证前端价格是否正确
     // 开仓
     struct SignedPriceInput {
@@ -197,10 +200,6 @@ contract SatoshiOptions_Charm is
         return _nftStore[_pid];
     }
 
-    function setRoute(address _route) external {
-        route = _route;
-    }
-
     function mintTo(
         address _to,
         bool direction,
@@ -215,7 +214,7 @@ contract SatoshiOptions_Charm is
         checkStrategy(_strategy)
         onlyRoute
         nonReentrant
-        returns (uint256 pid, uint256 mintBalance)
+        returns (uint256 pid)
     {
         int128 tradePrice = int128(signedPr.tradePrice);
 
@@ -235,8 +234,8 @@ contract SatoshiOptions_Charm is
         );
 
         // pbc int128 64*64
-        mintBalance = uint128(_pbc);
-        pid = _mintNft(_to, mintBalance);
+        // mintBalance = uint128(_pbc);
+        pid = _mintNft(_to, uint128(_pbc));
 
         NftData storage nftData = _nftStore[pid];
         nftData.delta = int128(_delta);
@@ -250,7 +249,6 @@ contract SatoshiOptions_Charm is
 
         // _burnFor(_to, _cppcNum / (1 << 64));
         emit Open(_to, pid, signedPr.tradePrice);
-        return pid;
     }
 
     // 通过Delta获取配置

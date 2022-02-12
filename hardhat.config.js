@@ -20,6 +20,12 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 200,
+    },
+  },
   solidity: {
     compilers: [
       {
@@ -27,12 +33,18 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 1000,
           },
         },
       },
       {
         version: '0.8.3',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
       }
     ]
   },
@@ -53,7 +65,7 @@ module.exports = {
       ]
     },
     hecoTest: {
-      url: "https://http-testnet.huobichain.com",
+      url: "https://http-testnet.hecochain.com",
       accounts: [
         "7d0b3663b9143cb4f36053b8fe001c62985852159cad3b3d0d18aa68f3c57727", // 0xC8C3dD114E4cAa70a313Aa1022151F1C3172bEcc
         "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",

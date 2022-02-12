@@ -4,7 +4,7 @@ pragma solidity ^0.8.3;
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../interfaces/IConfig.sol";
 
-contract LinearOption {
+contract LinearOptions {
     using ABDKMath64x64 for int128;
 
     struct GetPBCTInfo {
@@ -283,7 +283,7 @@ contract LinearOption {
         int128 priceimpact = getPriceimpact(rl, pbct, BTCInfo.t, phi);
         return
             _getLiquidationNum(
-                LinearOption.GetLiquidationNumInfo(pbct, Q, rl, priceimpact),
+                LinearOptions.GetLiquidationNumInfo(pbct, Q, rl, priceimpact),
                 withdrawFee,
                 r
             );
