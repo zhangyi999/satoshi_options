@@ -16,7 +16,7 @@ import "./interfaces/IConfig.sol";
 // import "./public/LinearOptions.sol";
 
 
-import "hardhat/console.sol";
+// import "hardhat/console.sol";
 
 interface IStrategy {
     struct GetPBCTInfo {
@@ -281,13 +281,12 @@ contract SatoshiOptions_Charm is
 
         IStrategy strategy = IStrategy(nftData.strategy);
         nftData.tradeToken = signedPr.tradeToken;
-        console.log("block.timestamp - nftData.createTime %s", block.timestamp - nftData.createTime);
 
         int128 LiquidationNum = strategy.getLiquidationNum(
             IStrategy.GetPBCTInfo(
                 nftData.direction,
                 nftData.delta,
-                int128(uint128((block.timestamp - nftData.createTime))),
+                int128(uint128((block.timestamp - nftData.createTime) << 64)),
                 nftData.bk,
                 nftData.K,
                 int128(signedPr.tradePrice)
@@ -300,10 +299,8 @@ contract SatoshiOptions_Charm is
             config.r(),
             int128(_cAmount)
         );
-        console.log("LiquidationNum %s", uint128(LiquidationNum) / (1<<64));
-        _liquidationNum = uint128(LiquidationNum) * 1e10 / (1 << 64) * 1e8;
-        console.log("_liquidationNum %s", _liquidationNum);
-
+        // console.log("LiquidationNum %s");
+        _liquidationNum = uint256(uint128(LiquidationNum)) * 1e18 / (1 << 64);
 
         _burnNft(_from, _pid, _cAmount);
         // _mintCppc(_from, _liquidationNum);

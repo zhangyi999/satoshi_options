@@ -91,67 +91,9 @@
 
 // async function main() {
 //     let [owner, alice, bob] = await ethers.getSigners()
-//     console.log("owner", owner.address)
-//     //////// config ////////
-//     config = await ethers.getContractFactory("contracts/Config.sol:Config");
-//     config = await config.deploy();
-//     console.log("config address: ", config.address)
-
-//     let tx = await config.setConfig([
-//         getInt128(depositFee),
-//         getInt128(withdrawFee),
-//         getInt128(sigma),
-//         getInt128(lambda),
-//         getInt128(eta1),
-//         getInt128(eta2),
-//         getInt128(p),
-//         getInt128(q),
-//         getInt128(phi),
-//         getInt128(pcpct),
-//         getInt128(r)
-//     ])
-//     console.log("set config hash: ",tx.hash)
-//     await tx.wait()
-
-//     tx = await config.setLTable(
-//         ltable.map((item) => {
-//             return [
-//                 getInt128(item.delta),
-//                 getInt128(item.l1),
-//                 getInt128(item.l2),
-//                 getInt128(item.l3),
-//                 getInt128(item.l4),
-//             ]
-//         })
-//     )
-//     console.log("set LTable hash: ",tx.hash)
-//     await tx.wait()
-
-//     //////// charm token ////////
-//     charm_token = await ethers.getContractFactory("Charm");
-//     charm_token = await charm_token.deploy()
-//     console.log("charm_token to: ", charm_token.address)
-
-//     //////// 线性期权 ////////
-//     SatoshiOpstion_Charm = await ethers.getContractFactory("SatoshiOpstion_Charm");
-//     SatoshiOpstion_Charm = await upgrades.deployProxy(SatoshiOpstion_Charm,[
-//         'http://satoshiOpstion_sharm',
-//         charm_token.address,
-//         config.address
-//     ]);
+//     SatoshiOpstion_Charm = await ethers.getContractFactory("SatoshiOptions_Charm");
+//     SatoshiOpstion_Charm = await upgrades.upgradeProxy('0x67cABa39b375aAb0615442a8D799bC1aeB59e082',SatoshiOpstion_Charm);
 //     console.log("SatoshiOpstion_Charm to: ", SatoshiOpstion_Charm.address)
-
-//     tx = await SatoshiOpstion_Charm.setDataProvider(
-//         SIGNER_ADDRESS
-//     )
-//     console.log("set siger hash: ",tx.hash)
-//     await tx.wait()
-
-    
-//     const mintAmount = BN.from(100000).mul('0x' + (1e18))
-//     tx = await charm_token.mint(owner.address, mintAmount)
-//     console.log('mint: ',tx.hash)
-//     await tx.wait()
 // }
 
 // // We recommend this pattern to be able to use async/await everywhere
