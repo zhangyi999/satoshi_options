@@ -123,24 +123,24 @@ describe("SatoshiOpstion_Charm", function () {
     before("deploy", async function () {
         const [owner, bob, alice, eln] = await ethers.getSigners();
 
-        console.log(getInt128(1e18), owner.address,'getInt128(1123.31)getInt128(1123.31)')
+        // console.log(getInt128(1e18), owner.address,'getInt128(1123.31)getInt128(1123.31)')
 
         //////// token /////////
         WETH = await ethers.getContractFactory("MockWETH");
         WETH = await WETH.deploy();
-        console.log('WETH ', WETH.address)
+        // console.log('WETH ', WETH.address)
 
         let TOKEN = await ethers.getContractFactory("Charm");
         BTC = await TOKEN.deploy();
-        console.log('BTC ', BTC.address)
+        // console.log('BTC ', BTC.address)
 
         Charm = await TOKEN.deploy();
-        console.log('Charm ', Charm.address)
+        // console.log('Charm ', Charm.address)
 
         //////// config ////////
         config = await ethers.getContractFactory("contracts/Config.sol:Config");
         config = await config.deploy();
-        console.log("config address: ", config.address)
+        // console.log("config address: ", config.address)
 
         tx = await config.setConfig([
             getInt128(depositFee),
@@ -155,7 +155,7 @@ describe("SatoshiOpstion_Charm", function () {
             getInt128(pcpct),
             getInt128(r)
         ])
-        console.log("set config hash: ",tx.hash)
+        // console.log("set config hash: ",tx.hash)
         await tx.wait()
 
         tx = await config.setLTable(
@@ -169,24 +169,24 @@ describe("SatoshiOpstion_Charm", function () {
                 ]
             })
         )
-        console.log("set LTable hash: ",tx.hash)
+        // console.log("set LTable hash: ",tx.hash)
         await tx.wait()
 
         tx = await config.addTokenDelta(
             BTC.address, ltable.map(v => getInt128(v.delta))
         )
-        console.log("addTokenDelta hash: ",tx.hash)
+        // console.log("addTokenDelta hash: ",tx.hash)
         await tx.wait()
 
         //////// BinaryOptions & LinearOption ////////
         BinaryOptions = await ethers.getContractFactory("BinaryOptions");
 
         BinaryOptions = await BinaryOptions.deploy()
-        console.log('BinaryOptions tp: ', BinaryOptions.address)
+        // console.log('BinaryOptions tp: ', BinaryOptions.address)
 
         LinearOptions = await ethers.getContractFactory("LinearOptions");
         LinearOptions = await LinearOptions.deploy()
-        console.log('LinearOptions tp: ', LinearOptions.address)
+        // console.log('LinearOptions tp: ', LinearOptions.address)
 
         //////// 线性期权 ////////
         SatoshiOpstion_Charm = await ethers.getContractFactory("SatoshiOptions_Charm");
@@ -195,27 +195,27 @@ describe("SatoshiOpstion_Charm", function () {
             // config.address
             config.address
         ]);
-        console.log("SatoshiOpstion_Charm to: ", SatoshiOpstion_Charm.address)
+        // console.log("SatoshiOpstion_Charm to: ", SatoshiOpstion_Charm.address)
 
         // SatoshiOpstion_Charm = SatoshiOpstion_Charm.attach('0x0D51Cb4bAc75F70cb294e6c006D5DD1eAc4b6D5A') 
         tx = await SatoshiOpstion_Charm.setDataProvider(
         SIGNER_ADDRESS
         )
-        console.log("set siger hash: ",tx.hash)
+        // console.log("set siger hash: ",tx.hash)
         await tx.wait()
 
         tx = await SatoshiOpstion_Charm.setStrategy(
             BinaryOptions.address
             // '0x85656cF8451CeB81B0A48A03B82A0A0230bf1c28'
         )
-        console.log("setStrategy hash: ",tx.hash)
+        // console.log("setStrategy hash: ",tx.hash)
         await tx.wait()
 
         tx = await SatoshiOpstion_Charm.setStrategy(
             LinearOptions.address
             // '0x3374822edb84D0645C64fDa075e15D1b3B721247'
         )
-        console.log("setStrategy hash: ",tx.hash)
+        // console.log("setStrategy hash: ",tx.hash)
         await tx.wait()
 
         //////// router ////////
@@ -225,7 +225,7 @@ describe("SatoshiOpstion_Charm", function () {
             Charm.address,
             SatoshiOpstion_Charm.address
         )
-        console.log("router to ",router.address)
+        // console.log("router to ",router.address)
 
 
         //////// set Router ////////
@@ -233,13 +233,13 @@ describe("SatoshiOpstion_Charm", function () {
         tx = await SatoshiOpstion_Charm.setRoute(
             router.address
         )
-        console.log("setRoute hash: ",tx.hash)
+        // console.log("setRoute hash: ",tx.hash)
         await tx.wait()
 
         tx = await Charm.setupMinterRole(
             router.address
         )
-        console.log("setupMinterRole hash: ",tx.hash)
+        // console.log("setupMinterRole hash: ",tx.hash)
         await tx.wait()
     })
 
@@ -306,7 +306,7 @@ describe("SatoshiOpstion_Charm", function () {
             getInt128(6), // delta
             getInt128(1.3), // 杠杆
             getInt128(openSize), // 金额
-            BinaryOptions.address, // 策略 合约地址 ：contracts/public/BinaryOptions.sol | contracts/public/LinearOption.sol
+            LinearOptions.address, // 策略 合约地址 ：contracts/public/BinaryOptions.sol | contracts/public/LinearOption.sol
             [
                 tokenAddress, // 标的币种
                 tradePrice, // 交易价格
@@ -324,6 +324,15 @@ describe("SatoshiOpstion_Charm", function () {
         console.log(
             balanceInfo
         )
+        // balanceInfo.delta : delta
+        // balanceInfo.createTime : 开仓时间
+        // balanceInfo.openPrice : 开仓价格
+        // balanceInfo.direction : 方向
+        // balanceInfo.bk : 杠杆
+        // balanceInfo.K : 目标价
+        // balanceInfo.tradeToken : 交易 token
+        // balanceInfo.strategy : 期权策略合约地址
+
         ////// 仓位大小 //////
         let balanceSize128 = await SatoshiOpstion_Charm.balanceOf(owner.address,pid)
         let balanceSize256 = getInt256ForInt128(balanceSize128.toString())
@@ -334,7 +343,6 @@ describe("SatoshiOpstion_Charm", function () {
         ////// 收益计算 //////
         {
             const n1 = await SatoshiOpstion_Charm.seenNonces(router.address)
-            console.log(n1)
             const {
                 tokenAddress,
                 tradePrice,
@@ -343,11 +351,13 @@ describe("SatoshiOpstion_Charm", function () {
                 signature
             } = getPriceData(
                 BTC.address, // BTC 仓位 , 开 eth 换成 eth 地址
-                getInt128(40000.31), // btc 价格，该价格正式环境 通过 接口获取
+                getInt128(30000.31), // btc 价格，该价格正式环境 通过 接口获取
                 n1*1 + 1
             )
     
-            const resBalance = await router.callStatic.sellOptions(
+            //////// 查询 仓位 当前收益 ////////
+            // balanceSize128 平仓后 克获得 resBalance 个 token
+            let resBalance = await router.callStatic.sellOptions(
                 pid,
                 balanceSize128,
                 [
@@ -358,10 +368,36 @@ describe("SatoshiOpstion_Charm", function () {
                     signature // 签名
                 ]
             )
-    
+            
+            const close = await Charm.balanceOf(owner.address)
             console.log(
-                resBalance
+                "charm balance close before",
+                close.toString() 
             )
+            // 平仓
+            tx = await router.sellOptions(
+                pid,
+                balanceSize128,
+                [
+                    tokenAddress, // 标的币种
+                    tradePrice, // 交易价格
+                    nonce, // 签名 有效 nonce
+                    deadline,
+                    signature // 签名
+                ]
+            )
+            await tx.wait()
+
+            const close1 = await Charm.balanceOf(owner.address)
+            console.log(
+                "charm balance close after",
+                close1.toString()
+            )
+            console.log(
+                "charm balance",
+                close1.sub(close).toString() 
+            )
+
         }
         
     })

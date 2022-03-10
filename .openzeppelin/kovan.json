@@ -857,7 +857,7 @@
           {
             "contract": "SatoshiOptions_Charm",
             "label": "config",
-            "type": "t_contract(IConfig)6013",
+            "type": "t_contract(IConfig)6014",
             "src": "contracts/SatoshiOptions_Charm.sol:75"
           },
           {
@@ -899,7 +899,7 @@
           {
             "contract": "SatoshiOptions_Charm",
             "label": "_nftStore",
-            "type": "t_mapping(t_uint256,t_struct(NftData)5283_storage)",
+            "type": "t_mapping(t_uint256,t_struct(NftData)5284_storage)",
             "src": "contracts/SatoshiOptions_Charm.sol:102"
           },
           {
@@ -910,7 +910,7 @@
           }
         ],
         "types": {
-          "t_contract(IConfig)6013": {
+          "t_contract(IConfig)6014": {
             "label": "contract IConfig"
           },
           "t_address": {
@@ -928,10 +928,10 @@
           "t_array(t_uint256)dyn_storage": {
             "label": "uint256[]"
           },
-          "t_mapping(t_uint256,t_struct(NftData)5283_storage)": {
+          "t_mapping(t_uint256,t_struct(NftData)5284_storage)": {
             "label": "mapping(uint256 => struct SatoshiOptions_Charm.NftData)"
           },
-          "t_struct(NftData)5283_storage": {
+          "t_struct(NftData)5284_storage": {
             "label": "struct SatoshiOptions_Charm.NftData",
             "members": [
               {
@@ -1374,6 +1374,448 @@
             "label": "mapping(uint256 => struct SatoshiOptions_Charm.NftData)"
           },
           "t_struct(NftData)5286_storage": {
+            "label": "struct SatoshiOptions_Charm.NftData",
+            "members": [
+              {
+                "label": "delta",
+                "type": "t_int128"
+              },
+              {
+                "label": "createTime",
+                "type": "t_uint256"
+              },
+              {
+                "label": "openPrice",
+                "type": "t_int128"
+              },
+              {
+                "label": "direction",
+                "type": "t_bool"
+              },
+              {
+                "label": "bk",
+                "type": "t_int128"
+              },
+              {
+                "label": "K",
+                "type": "t_int128"
+              },
+              {
+                "label": "strategy",
+                "type": "t_address"
+              },
+              {
+                "label": "tradeToken",
+                "type": "t_address"
+              }
+            ]
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "34ef7acc145876bfcb4e3c788ce91620acdbc45d2464d1efdde1d360b98c843b": {
+      "address": "0xc35DcEaCf2227524aB2aa1623E175262132b6Bb9",
+      "txHash": "0x02921a0484c898a35fb8c9db95f137dc56ad16838bb3b63799fad9715a8214f7",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "ERC165Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:36"
+          },
+          {
+            "contract": "ERC1155Upgradeable",
+            "label": "_balances",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:25"
+          },
+          {
+            "contract": "ERC1155Upgradeable",
+            "label": "_operatorApprovals",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:28"
+          },
+          {
+            "contract": "ERC1155Upgradeable",
+            "label": "_uri",
+            "type": "t_string_storage",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:31"
+          },
+          {
+            "contract": "ERC1155Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)47_storage",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:471"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:82"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:38"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:68"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "config",
+            "type": "t_contract(IConfig)6100",
+            "src": "contracts/SatoshiOptions_Charm.sol:75"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "charm",
+            "type": "t_address",
+            "src": "contracts/SatoshiOptions_Charm.sol:78"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "route",
+            "type": "t_address",
+            "src": "contracts/SatoshiOptions_Charm.sol:81"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "seenNonces",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "contracts/SatoshiOptions_Charm.sol:84"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "DATA_PROVIDER",
+            "type": "t_address",
+            "src": "contracts/SatoshiOptions_Charm.sol:85"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "_totalSupply",
+            "type": "t_uint256",
+            "src": "contracts/SatoshiOptions_Charm.sol:88"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "_idBalance",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "src": "contracts/SatoshiOptions_Charm.sol:90"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "_nftStore",
+            "type": "t_mapping(t_uint256,t_struct(NftData)5363_storage)",
+            "src": "contracts/SatoshiOptions_Charm.sol:102"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "_isStrategy",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "contracts/SatoshiOptions_Charm.sol:105"
+          }
+        ],
+        "types": {
+          "t_contract(IConfig)6100": {
+            "label": "contract IConfig"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_mapping(t_uint256,t_struct(NftData)5363_storage)": {
+            "label": "mapping(uint256 => struct SatoshiOptions_Charm.NftData)"
+          },
+          "t_struct(NftData)5363_storage": {
+            "label": "struct SatoshiOptions_Charm.NftData",
+            "members": [
+              {
+                "label": "delta",
+                "type": "t_int128"
+              },
+              {
+                "label": "createTime",
+                "type": "t_uint256"
+              },
+              {
+                "label": "openPrice",
+                "type": "t_int128"
+              },
+              {
+                "label": "direction",
+                "type": "t_bool"
+              },
+              {
+                "label": "bk",
+                "type": "t_int128"
+              },
+              {
+                "label": "K",
+                "type": "t_int128"
+              },
+              {
+                "label": "strategy",
+                "type": "t_address"
+              },
+              {
+                "label": "tradeToken",
+                "type": "t_address"
+              }
+            ]
+          },
+          "t_int128": {
+            "label": "int128"
+          },
+          "t_bool": {
+            "label": "bool"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_mapping(t_uint256,t_mapping(t_address,t_uint256))": {
+            "label": "mapping(uint256 => mapping(address => uint256))"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))"
+          },
+          "t_string_storage": {
+            "label": "string"
+          },
+          "t_array(t_uint256)47_storage": {
+            "label": "uint256[47]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          }
+        }
+      }
+    },
+    "f24b3e322e1dfcdc9ff74c37c625486ad89677eef0017f2074038480e9834d0c": {
+      "address": "0xD749e8CBe2aB61Fb265E964dBF9f47Ba43E2E545",
+      "txHash": "0xb8fcf84f82dd60f22f08356a49e6fc6ac4c1c8b7e70a17b1351d27ef447892d4",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:39"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:44"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:31"
+          },
+          {
+            "contract": "ERC165Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin/contracts-upgradeable/utils/introspection/ERC165Upgradeable.sol:36"
+          },
+          {
+            "contract": "ERC1155Upgradeable",
+            "label": "_balances",
+            "type": "t_mapping(t_uint256,t_mapping(t_address,t_uint256))",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:25"
+          },
+          {
+            "contract": "ERC1155Upgradeable",
+            "label": "_operatorApprovals",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:28"
+          },
+          {
+            "contract": "ERC1155Upgradeable",
+            "label": "_uri",
+            "type": "t_string_storage",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:31"
+          },
+          {
+            "contract": "ERC1155Upgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)47_storage",
+            "src": "@openzeppelin/contracts-upgradeable/token/ERC1155/ERC1155Upgradeable.sol:471"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:22"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:82"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:38"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:68"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "config",
+            "type": "t_contract(IConfig)6097",
+            "src": "contracts/SatoshiOptions_Charm.sol:75"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "charm",
+            "type": "t_address",
+            "src": "contracts/SatoshiOptions_Charm.sol:78"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "route",
+            "type": "t_address",
+            "src": "contracts/SatoshiOptions_Charm.sol:81"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "seenNonces",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "contracts/SatoshiOptions_Charm.sol:84"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "DATA_PROVIDER",
+            "type": "t_address",
+            "src": "contracts/SatoshiOptions_Charm.sol:85"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "_totalSupply",
+            "type": "t_uint256",
+            "src": "contracts/SatoshiOptions_Charm.sol:88"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "_idBalance",
+            "type": "t_mapping(t_address,t_array(t_uint256)dyn_storage)",
+            "src": "contracts/SatoshiOptions_Charm.sol:90"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "_nftStore",
+            "type": "t_mapping(t_uint256,t_struct(NftData)5363_storage)",
+            "src": "contracts/SatoshiOptions_Charm.sol:102"
+          },
+          {
+            "contract": "SatoshiOptions_Charm",
+            "label": "_isStrategy",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "contracts/SatoshiOptions_Charm.sol:105"
+          }
+        ],
+        "types": {
+          "t_contract(IConfig)6097": {
+            "label": "contract IConfig"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_array(t_uint256)dyn_storage)": {
+            "label": "mapping(address => uint256[])"
+          },
+          "t_array(t_uint256)dyn_storage": {
+            "label": "uint256[]"
+          },
+          "t_mapping(t_uint256,t_struct(NftData)5363_storage)": {
+            "label": "mapping(uint256 => struct SatoshiOptions_Charm.NftData)"
+          },
+          "t_struct(NftData)5363_storage": {
             "label": "struct SatoshiOptions_Charm.NftData",
             "members": [
               {
