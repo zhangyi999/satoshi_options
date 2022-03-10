@@ -29,6 +29,8 @@ contract Config is Ownable {
     }
     mapping(int128 => DeltaItem) private _deltaTable;
 
+    mapping(address => mapping(uint128 => bool)) private _checkDelta;
+
     function p() external view returns(int128) {
         return _p;
     }
@@ -73,6 +75,22 @@ contract Config is Ownable {
             _deltaTable[_delta].L3 = int128(deltaItem.L3);
             _deltaTable[_delta].L4 = int128(deltaItem.L4);
         }
+    }
+
+    function addTokenDelta(address _token, uint128[] calldata _dels) external onlyOwner {
+        for(uint i = 0; i < _dels.length; i++) {
+            _checkDelta[_token][_dels[i]] = true;
+        }
+    }
+
+    function remvoTokenDelta(address _token, uint128[] calldata _dels) external onlyOwner {
+        for(uint i = 0; i < _dels.length; i++) {
+            _checkDelta[_token][_dels[i]] = false;
+        }
+    }
+
+    function checkDelta(address _token, uint128 _delta) external returns(bool) {
+        return _checkDelta[_token][_delta];
     }
 
 }

@@ -90,6 +90,8 @@ let SatoshiOpstion_Charm;
 let charm_token;
 
 async function main() {
+    let [owner, alice, bob] = await ethers.getSigners()
+    console.log("owner", owner.address)
     //////// config ////////
     config = await ethers.getContractFactory("contracts/Config.sol:Config");
     config = await config.deploy();
@@ -145,7 +147,7 @@ async function main() {
     console.log("set siger hash: ",tx.hash)
     await tx.wait()
 
-    let [owner, alice, bob] = await ethers.getSigners()
+    
     const mintAmount = BN.from(100000).mul('0x' + (1e18))
     tx = await charm_token.mint(owner.address, mintAmount)
     console.log('mint: ',tx.hash)

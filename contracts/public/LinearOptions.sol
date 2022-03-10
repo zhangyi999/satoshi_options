@@ -4,7 +4,9 @@ pragma solidity ^0.8.3;
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../interfaces/IConfig.sol";
 
-contract BinaryOptions {
+// import "hardhat/console.sol";
+
+contract LinearOptions {
     using ABDKMath64x64 for int128;
 
     struct GetPBCTInfo {
@@ -22,6 +24,12 @@ contract BinaryOptions {
         int128 bk;
         int128 delta;
         int128 _i;
+    }
+
+    struct GetEInfo {
+        bool direction;
+        int128 delta;
+        int128 bk;
     }
 
     //////////// 64x64 ////////////
@@ -42,6 +50,7 @@ contract BinaryOptions {
         int128 L1,
         int128 L2
     ) public pure returns (int128) {
+        
         return _eta1_128.sub(L1).div(_eta1_128).mul(L2.div(L2.sub(L1)));
     }
 
@@ -58,31 +67,86 @@ contract BinaryOptions {
         return currBtc.mul(bk);
     }
 
+    // 获取E
+    function getE(
+        GetEInfo memory _getEInfo,
+        IConfig.DeltaItem memory _DeltaItem,
+        int128 _eta1_128,
+        int128 _eta2_128,
+        int128 currBtc
+    ) public pure returns (int128) {
+        int128 l1Orl3;
+        int128 l2Orl4;
+        int128 omg;
+        int128 _int = 1 << 64;
+
+        if (_getEInfo.direction) {
+            l1Orl3 = _DeltaItem.L1;
+            l2Orl4 = _DeltaItem.L2;
+            omg = getUpOmg(_eta1_128, l1Orl3, l2Orl4);
+        } else {
+            l1Orl3 = _DeltaItem.L3;
+            l2Orl4 = _DeltaItem.L4;
+            omg = getDownOmg(_eta2_128, l1Orl3, l2Orl4);
+        }
+        int128 K = getBk(currBtc, _getEInfo.bk);
+
+        // 这里的 a_2 和 b_2 需要检查
+        int128 a_1 = omg.mul(l1Orl3);
+        int128 a_2 = l2Orl4.mul(_int.sub(omg));
+        int128 a = K.mul(a_1.add(a_2));
+        int128 b = a_1.add(a_2);
+        b = _getEInfo.direction
+            ? b.add(_int)
+            : b.sub(_int);
+        int128 _e = a.div(b);
+        return _e;
+    }
+
     function getPurchaseQuantity(
         GetPurchaseQuantityInfo memory _getPurchaseQuantityInfo,
         IConfig.DeltaItem memory deltaItem,
         int128 eta1,
         int128 eta2,
-        int128
+        int128 currBtc
     ) public pure returns (int128) {
+        int128 B0 = currBtc;
         int128 omg = _getPurchaseQuantityInfo.direction
             ? getUpOmg(eta1, deltaItem.L1, deltaItem.L2)
             : getDownOmg(eta2, deltaItem.L3, deltaItem.L4);
-
+        
+        int128 _E = getE(
+            GetEInfo(
+                _getPurchaseQuantityInfo.direction,
+                _getPurchaseQuantityInfo.delta,
+                _getPurchaseQuantityInfo.bk
+            ),
+            deltaItem,
+            eta1,
+            eta2,
+            B0
+        );
+        
+        int128 _K = getBk(currBtc, _getPurchaseQuantityInfo.bk);
         int128 omg1;
         int128 omg2;
         if (_getPurchaseQuantityInfo.direction) {
-            omg1 = omg.div(pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L1));
-            omg2 = (int128(1 << 64).sub(omg)).div(
-                pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L2)
+            omg1 = omg.mul(pow64x64(B0.div(_E), deltaItem.L1));
+            omg2 = (int128(1 << 64).sub(omg)).mul(
+                pow64x64(B0.div(_E), deltaItem.L2)
             );
         } else {
-            omg1 = omg.div(pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L3));
-            omg2 = (int128(1 << 64).sub(omg)).div(
-                pow64x64(_getPurchaseQuantityInfo.bk, deltaItem.L4)
+            omg1 = omg.mul(pow64x64(_E.div(B0), deltaItem.L3));
+            omg2 = (int128(1 << 64).sub(omg)).mul(
+                pow64x64(_E.div(B0), deltaItem.L4)
             );
         }
+        
         int128 _Q = _getPurchaseQuantityInfo._i.div(omg1.add(omg2));
+        _Q = _getPurchaseQuantityInfo.direction
+            ? _Q.mul(_K.sub(_E))
+            : _Q.mul(_E.sub(_K));
+        
         return _Q;
     }
 
@@ -108,38 +172,25 @@ contract BinaryOptions {
         int128 l1Orl3;
         int128 l2Orl4;
         int128 omg;
+        int128 _Bt = _getPBCTInfo.BT;
 
+        int128 _a;
         if (_getPBCTInfo.direction) {
             l1Orl3 = _DeltaItem.L1;
             l2Orl4 = _DeltaItem.L2;
             omg = getUpOmg(_eta1, l1Orl3, l2Orl4);
+            _a = max128(0, _Bt.sub(_getPBCTInfo.K));
         } else {
             l1Orl3 = _DeltaItem.L3;
             l2Orl4 = _DeltaItem.L4;
             omg = getDownOmg(_eta2, l1Orl3, l2Orl4);
+            _a = max128(0, _getPBCTInfo.K.sub(_Bt));
         }
-        int128 _a1_w_l1;
-        int128 _a2_w_l2;
-        int128 _tb = getTB(
-            _getPBCTInfo.direction,
-            _getPBCTInfo.K,
-            _getPBCTInfo.BT
-        );
-        // int128 _a1 = _tb.div(_getPBCTInfo.K);
-        int128 _a2_l2 = pow64x64(_tb.div(_getPBCTInfo.K), l2Orl4);
-        if (_getPBCTInfo.direction) {
-            _a1_w_l1 = omg.mul(pow64x64(_tb.div(_getPBCTInfo.K), l1Orl3));
-            _a2_w_l2 = (int128(1 << 64).sub(omg)).mul(_a2_l2);
-        } else {
-            _a1_w_l1 = omg.div(pow64x64(_tb.div(_getPBCTInfo.K), l1Orl3));
-            _a2_w_l2 = (int128(1 << 64).sub(omg)).div(_a2_l2);
-        }
-
         // SECONDS_IN_A_YEAR 581736521108504419762176000
         int128 _t = _getPBCTInfo.t.div(581736521108504419762176000);
         int128 _deltaT = _getPBCTInfo.delta.mul(_t);
         int128 _b = _deltaT.exp();
-        return (_a1_w_l1.add(_a2_w_l2)).div(_b);
+        return _a.div(_b);
     }
 
     struct GetRlInfo {
@@ -235,7 +286,7 @@ contract BinaryOptions {
         int128 priceimpact = getPriceimpact(rl, pbct, BTCInfo.t, phi);
         return
             _getLiquidationNum(
-                BinaryOptions.GetLiquidationNumInfo(pbct, Q, rl, priceimpact),
+                LinearOptions.GetLiquidationNumInfo(pbct, Q, rl, priceimpact),
                 withdrawFee,
                 r
             );

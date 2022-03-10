@@ -20,14 +20,33 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
+  settings: {
+    optimizer: {
+      enabled: true,
+      runs: 200,
+    },
+  },
   solidity: {
-    version: '0.8.4',
-    settings: {
-      optimizer: {
-        runs: 200,
-        enabled: true
+    compilers: [
+      {
+        version: "0.8.4",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
+      },
+      {
+        version: '0.8.3',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
       }
-    }
+    ]
   },
   networks: {
     dev: {
@@ -40,19 +59,18 @@ module.exports = {
       ]
     },
     kovan: {
-      url: "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
-      accounts: [
-        ...kovan,
-      ]
+      // url: "https://kovan.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
+      url: "https://eth-kovan.alchemyapi.io/v2/0qIanEpvWO-JuBtnxTyP6tAW_PxCAUmF",
+      accounts: kovan
     },
     hecoTest: {
-      url: "https://http-testnet.huobichain.com",
+      url: "https://http-testnet.hecochain.com",
       accounts: [
         "7d0b3663b9143cb4f36053b8fe001c62985852159cad3b3d0d18aa68f3c57727", // 0xC8C3dD114E4cAa70a313Aa1022151F1C3172bEcc
         "0x92db14e403b83dfe3df233f83dfa3a0d7096f21ca9b0d6d6b8d88b2b4ec1564e",
         "0x4bbbf85ce3377467afe5d46f804f221813b2bb87f24d81f60f1fcdbf7cbf4356",
         "0xdbda1821b80551c9d65939329250298aa3472ba22feea921c0cf5d620ea67b97",
-        
+
       ],
     }
   }
