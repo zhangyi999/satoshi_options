@@ -16,7 +16,7 @@ import "./interfaces/IConfig.sol";
 // import "./public/LinearOptions.sol";
 
 
-// import "hardhat/console.sol";
+import "hardhat/console.sol";
 
 interface IStrategy {
     struct GetPBCTInfo {
@@ -81,7 +81,7 @@ contract SatoshiOptions_Charm is
     address public route;
 
     //////////// signer ////////////
-    mapping(address => mapping(uint256 => bool)) private seenNonces;
+    mapping(address => uint256) public seenNonces;
     address public DATA_PROVIDER;
 
     //////////// nft ////////////
@@ -184,8 +184,10 @@ contract SatoshiOptions_Charm is
         address signer = messageHash.recover(signature);
         require(deadline >= block.timestamp, "Prices have expired");
         require(signer == DATA_PROVIDER, "INVALID_SIGNER.");
-        require(!seenNonces[signer][nonce], "USED_NONCE");
-        seenNonces[signer][nonce] = true;
+        // nonce 递增
+        // console.log("nonce %s | signer %s | signer nonce %s", nonce, signer, seenNonces[signer]);
+        require(seenNonces[msg.sender] < nonce, "USED_NONCE");
+        seenNonces[msg.sender] = nonce;
 
         success = true;
         return success;
@@ -205,7 +207,7 @@ contract SatoshiOptions_Charm is
         bool direction,
         uint128 _delta,
         uint128 _bk,
-        uint128 _cppcNum,
+        uint128 _cppcNum, // 1.321 * 64
         address _strategy,
         SignedPriceInput calldata signedPr
     )
@@ -214,13 +216,14 @@ contract SatoshiOptions_Charm is
         checkStrategy(_strategy)
         onlyRoute
         nonReentrant
-        returns (uint256 pid)
+        returns (uint256 pid, uint256 mintBalance)
     {
+        require(config.checkDelta(signedPr.tradeToken, _delta), 'delta not set trade token');
         int128 tradePrice = int128(signedPr.tradePrice);
 
         IStrategy strategy = IStrategy(_strategy);
         // int128 K = strategy.getBk(tradePrice, int128(_bk));
-        int128 _pbc = strategy.getPurchaseQuantity(
+        mintBalance = uint128(strategy.getPurchaseQuantity(
             IStrategy.GetPurchaseQuantityInfo(
                 direction,
                 int128(_bk),
@@ -231,11 +234,11 @@ contract SatoshiOptions_Charm is
             config.eta1(),
             config.eta2(),
             tradePrice
-        );
+        ));
 
         // pbc int128 64*64
         // mintBalance = uint128(_pbc);
-        pid = _mintNft(_to, uint128(_pbc));
+        pid = _mintNft(_to, mintBalance);
 
         NftData storage nftData = _nftStore[pid];
         nftData.delta = int128(_delta);
@@ -278,12 +281,13 @@ contract SatoshiOptions_Charm is
 
         IStrategy strategy = IStrategy(nftData.strategy);
         nftData.tradeToken = signedPr.tradeToken;
+        console.log("block.timestamp - nftData.createTime %s", block.timestamp - nftData.createTime);
 
         int128 LiquidationNum = strategy.getLiquidationNum(
             IStrategy.GetPBCTInfo(
                 nftData.direction,
                 nftData.delta,
-                int128(uint128((block.timestamp - nftData.createTime) << 64)),
+                int128(uint128((block.timestamp - nftData.createTime))),
                 nftData.bk,
                 nftData.K,
                 int128(signedPr.tradePrice)
@@ -296,8 +300,10 @@ contract SatoshiOptions_Charm is
             config.r(),
             int128(_cAmount)
         );
+        console.log("LiquidationNum %s", uint128(LiquidationNum) / (1<<64));
+        _liquidationNum = uint128(LiquidationNum) * 1e10 / (1 << 64) * 1e8;
+        console.log("_liquidationNum %s", _liquidationNum);
 
-        _liquidationNum = uint128(LiquidationNum / (1 << 64));
 
         _burnNft(_from, _pid, _cAmount);
         // _mintCppc(_from, _liquidationNum);

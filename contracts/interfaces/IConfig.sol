@@ -19,4 +19,5 @@ interface IConfig {
     function phi() external view returns(int128);
     function r() external view returns(int128);
     function delta(int128 _d) external view returns(DeltaItem memory);
+    function checkDelta(address _token, uint128 _delta) external returns(bool);
 }

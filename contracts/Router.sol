@@ -2,14 +2,18 @@ pragma solidity ^0.8.3;
 
 // import "./cbbc_related/Owned.sol";
 //import "./MixinResolver.sol";
-import "./MixinSystemSettings.sol";
+// import "./router_import/MixinSystemSettings.sol";
 import "./interfaces/ICharmToken.sol";
 
 import "./interfaces/IIssuerForSatoshiOptions.sol";
 
+import "./interfaces/IWETH.sol";
+
 import "./libraries/SafeToken.sol";
 
-contract Router is MixinSystemSettings {
+import "hardhat/console.sol";
+
+contract Router {
     using SafeToken for address;
 
     bytes32 public constant CONTRACT_NAME = "Router";
@@ -36,85 +40,36 @@ contract Router is MixinSystemSettings {
 
     //// the address of the Cppc Chef contract, which convert the liquidity token to Cppc token
 
-    constructor(address _owner, address _resolver)
-        Owned(_owner)
-        MixinSystemSettings(_resolver)
-    {}
+    // receive() external payable {
+    //     assert(msg.sender == address(weth())); // only accept ETH via fallback from the WETH contract
+    // }
 
-    receive() external payable {
-        assert(msg.sender == address(weth())); // only accept ETH via fallback from the WETH contract
+    address private _weth;
+    address private _charm;
+    address private _options;
+    constructor(address _weth_, address _charm_, address _options_) public {
+        _weth = _weth_;
+        _charm = _charm_;
+        _options = _options_;
     }
 
     /* ========== VIEWS ========== */
-    function resolverAddressesRequired()
-        public
-        view
-        override
-        returns (bytes32[] memory addresses)
-    {
-        bytes32[] memory existingAddresses = MixinSystemSettings
-            .resolverAddressesRequired();
-        bytes32[] memory newAddresses = new bytes32[](7);
-        newAddresses[0] = CHARM;
-        newAddresses[1] = ETH;
-        newAddresses[2] = CONTRACT_ISSUER_FOR_LIQUIDITY_TOKEN;
-        newAddresses[3] = CONTRACT_ISSUER_FOR_CBBC_TOKEN;
-        newAddresses[4] = CONTRACT_ISSUER_FOR_DIVIDEND_TOKEN;
-        newAddresses[5] = CONTRACT_MARKET_ORACLE;
-        newAddresses[6] = CONTRACT_ORCHESTRATOR;
-        return combineArrays(existingAddresses, newAddresses);
+    function weth() public view returns(IWETH) {
+        // IWETH();
+        return IWETH(_weth);
     }
 
-    function charm() internal view returns (ICharmToken) {
-        return ICharmToken(requireAndGetAddress(CHARM));
-    }
-
-    function weth() internal view returns (IWETH) {
-        return IWETH(requireAndGetAddress(ETH));
-    }
-
-    // function issuerForCbbcToken() internal view returns (IIssuerForCbbcToken) {
-    //     return
-    //         IIssuerForCbbcToken(
-    //             requireAndGetAddress(CONTRACT_ISSUER_FOR_CBBC_TOKEN)
-    //         );
-    // }
-
-    function issuerForLiquidityToken()
-        internal
-        view
-        returns (IIssuerForLiquidityToken)
-    {
-        return
-            IIssuerForLiquidityToken(
-                requireAndGetAddress(CONTRACT_ISSUER_FOR_LIQUIDITY_TOKEN)
-            );
-    }
-
-    function issuerForDividendToken()
-        internal
-        view
-        returns (IIssuerForDividendToken)
-    {
-        return
-            IIssuerForDividendToken(
-                requireAndGetAddress(CONTRACT_ISSUER_FOR_DIVIDEND_TOKEN)
-            );
-    }
-
-    function marketOracle() internal view returns (IMarketOracle) {
-        return IMarketOracle(requireAndGetAddress(CONTRACT_MARKET_ORACLE));
+    function charm() public view returns (ICharmToken) {
+        return ICharmToken(_charm);
     }
 
     // function orchestrator() internal view returns (IOrchestrator) {
     //     return IOrchestrator(requireAndGetAddress(CONTRACT_ORCHESTRATOR));
     // }
 
-    function satoshiOptions() internal view returns (IIssuerForSatoshiOptions) {
+    function satoshiOptions() public view returns (IIssuerForSatoshiOptions) {
         return
-            IIssuerForSatoshiOptions(
-                requireAndGetAddress(CONTRACT_SATOSHIOPTIONS)
-            );
+            IIssuerForSatoshiOptions(_options);
     }
 
     
@@ -127,9 +82,10 @@ contract Router is MixinSystemSettings {
         uint128 _cppcNum,
         address _strategy,
         IIssuerForSatoshiOptions.SignedPriceInput calldata signedPr
-    ) external payable override returns (uint256 pid, uint256 mintBalance) {
-        _deposit(signedPr.tradeToken, msg.sender, _cppcNum);
-        (pid,mintBalance) = satoshiOptions().mintTo(
+    ) external payable returns (uint256 pid, uint256 mintBalance) {
+        // console.log("wom %s %s %s", _cppcNum,mulu(int128(_cppcNum), 1e18));
+        _deposit(signedPr.tradeToken, msg.sender, mulu(int128(_cppcNum), 1e18));
+        (pid, mintBalance) = satoshiOptions().mintTo(
             msg.sender,
             direction,
             _delta,
@@ -141,16 +97,17 @@ contract Router is MixinSystemSettings {
     }
 
     function _mintLiquidityToken(
-        address token,
         address destAccount,
         uint256 amount
-    ) external {}
+    ) internal {
+        charm().mint(destAccount, amount);
+    }
 
     function sellOptions(
         uint256 _pid,
         uint128 _cAmount,
         IIssuerForSatoshiOptions.SignedPriceInput calldata signedPr
-    ) external override returns (uint256 liquidationNum) {
+    ) external returns (uint256 liquidationNum) {
         liquidationNum = satoshiOptions().burnFor(
             msg.sender,
             _pid,
@@ -163,11 +120,11 @@ contract Router is MixinSystemSettings {
             _withdraw(signedPr.tradeToken, msg.sender, balance);
             liquidationNum -= balance;
         }
-        // _mintLiquidityToken(token, msg.sender, liquidationNum);
+        _mintLiquidityToken(msg.sender, liquidationNum);
     }
 
     function _containersBalance() internal view returns (uint256) {
-        return address(issuerForLiquidityToken()).myBalance();
+        return address(charm()).myBalance();
     }
 
     function _deposit(
@@ -175,7 +132,7 @@ contract Router is MixinSystemSettings {
         address _from,
         uint256 amount
     ) internal {
-        address containers = address(issuerForLiquidityToken());
+        address containers = address(charm());
         if (token == address(0)) {
             amount = msg.value;
             weth().deposit{value: amount}();
@@ -203,4 +160,23 @@ contract Router is MixinSystemSettings {
         require(deadline >= block.timestamp, "CBBC::Router: EXPIRED");
         _;
     }
+
+    function mulu (int128 x, uint256 y) internal pure returns (uint256) {
+        unchecked {
+        if (y == 0) return 0;
+
+        require (x >= 0);
+
+        uint256 lo = (uint256 (int256 (x)) * (y & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)) >> 64;
+        uint256 hi = uint256 (int256 (x)) * (y >> 128);
+
+        require (hi <= 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+        hi <<= 64;
+
+        require (hi <=
+            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF - lo);
+        return hi + lo;
+        }
+    }
+
 }

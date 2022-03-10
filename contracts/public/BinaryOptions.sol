@@ -62,7 +62,8 @@ contract BinaryOptions {
         GetPurchaseQuantityInfo memory _getPurchaseQuantityInfo,
         IConfig.DeltaItem memory deltaItem,
         int128 eta1,
-        int128 eta2
+        int128 eta2,
+        int128
     ) public pure returns (int128) {
         int128 omg = _getPurchaseQuantityInfo.direction
             ? getUpOmg(eta1, deltaItem.L1, deltaItem.L2)

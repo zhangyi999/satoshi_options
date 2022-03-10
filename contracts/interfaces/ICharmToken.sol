@@ -8,5 +8,5 @@ interface ICharmToken{
     // Restricted: used internally to Synthetix
     function burn(address account, uint amount) external returns (bool);
     function issue(address account, uint amount) external;
-    function mint(address _to, uint256 _amount);
+    function mint(address _to, uint256 _amount) external;
 }

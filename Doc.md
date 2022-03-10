@@ -138,3 +138,22 @@ const tokens = await methods.call()
 // 平仓上链
 const tx = await methods.send()
 ```
+
+
+<!-- WETH  0x791229928Be5F33194E779787b63555D32F8AA9E
+BTC  0x1d8E11b10e35AC2E355b39D8e0798D25Cd621837
+Charm  0x38c2A5a38365b50383f51cfD500a04501e4a6109
+config address:  0x1E9a5746a4ba4355bf89CAF331Ae51ce00fF9eb8
+set config hash:  0x1869c3e0fd7cbf6f5f49aad57cb7fd60e71661bbc9c70fa6dfe431bd34eb08ea
+set LTable hash:  0x2a6665a3c647f32e6cd2bbe8979f13035ec844bd202fe0bf8e975cc63dc4aaa1
+addTokenDelta hash:  0xf576a8af9aca5ccd3184ac8ed44a7b60ce998202d28916987d39e2baaaa9e7a9
+BinaryOptions tp:  0x0Ee4454F6FD8c64e5633f34bF844105450257009
+LinearOptions tp:  0xEd95A8a9421AbBC5474a922bF6736C37292aF68C
+SatoshiOpstion_Charm to:  0xaBDA68F785Dc76e8556B6cF4f9e4D7CD215BD1dd
+set siger hash:  0xec8316b388b8505ff5611b4fcc1e5f38a4d5954954bbdfcc96fdf10be40ec975
+setStrategy hash:  0x884874e748926a28a94dec941e16aa2d18b86993f8a167d7b766bdd96b785b6a
+setStrategy hash:  0x5b83a734ef6ed7562a2886ae1e6cf19c7f97415eb30f0849315f74fc32f04bb2
+router to  0x34E248C842354669E38532Ec5d9c906c5018B54E
+setRoute hash:  0x6b1480eb60a4eddc79069a14e3c7b56b7878d2e1b2ef898e0d31765fe353e473
+setupMinterRole hash:  0x394991ad6ee0233e8b482546918b85ee6d525f12dbebae95057397ce8473c54d
+BTC mint hash:  0x6ee6823f36aa3b6926957a299dfeacce3a2e92a93135503f085d5526377ae337 -->

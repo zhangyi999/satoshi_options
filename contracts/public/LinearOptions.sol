@@ -4,6 +4,8 @@ pragma solidity ^0.8.3;
 import "abdk-libraries-solidity/ABDKMath64x64.sol";
 import "../interfaces/IConfig.sol";
 
+// import "hardhat/console.sol";
+
 contract LinearOptions {
     using ABDKMath64x64 for int128;
 
@@ -48,6 +50,7 @@ contract LinearOptions {
         int128 L1,
         int128 L2
     ) public pure returns (int128) {
+        
         return _eta1_128.sub(L1).div(_eta1_128).mul(L2.div(L2.sub(L1)));
     }
 
@@ -140,10 +143,10 @@ contract LinearOptions {
         }
         
         int128 _Q = _getPurchaseQuantityInfo._i.div(omg1.add(omg2));
-        
         _Q = _getPurchaseQuantityInfo.direction
             ? _Q.mul(_K.sub(_E))
             : _Q.mul(_E.sub(_K));
+        
         return _Q;
     }
 
